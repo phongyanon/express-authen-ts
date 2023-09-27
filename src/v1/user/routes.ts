@@ -26,4 +26,8 @@ router.get("/users", (req: Request, res: Response): void => {
   res.status(200).send(users);
 });
 
+router.post("/user", (req: Request, res: Response): void => {
+  res.status(201).send({message: 'Successfully create', id: '1'});
+});
+
 export { router };
