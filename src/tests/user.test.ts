@@ -20,7 +20,6 @@ interface IUserResponse {
 }
 
 function isIUserResponse(obj: any): obj is IUserResponse {
-  // const keysOfProps = keys<IUserResponse>();
   const keysOfProps: string[] = [
     'id',
     'username',
@@ -80,7 +79,7 @@ describe("CRUD User", () => {
     const res = await request(app).get(`/${api_version}/users`);
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveLength;
-    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.length).toBe(1);
 
     res.body.forEach((element: IUserResponse) => {
       expect(isIUserResponse(element)).toBe(true);
