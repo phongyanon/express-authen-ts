@@ -7,9 +7,10 @@
     "build": "npx tsc",
     "start": "node dist/server.js",
     "dev:server": "nodemon --watch './**/*.ts' --exec 'ts-node' server.ts",
-    "dev": "ts-node server.ts",
-    "test": "jest --runInBand",
-    "migrate:mysql": "ts-node src/db_migration/mysql.ts"
+    "dev": "NODE_ENV=development ts-node server.ts",
+    "test": "NODE_ENV=test jest --runInBand",
+    "migrate:mysql": "NODE_ENV=development ts-node src/db_migration/mysql.ts",
+    "migrate:mysql-test": "NODE_ENV=test ts-node src/db_migration/mysql.ts"
   },
   "keywords": [],
   "author": "",

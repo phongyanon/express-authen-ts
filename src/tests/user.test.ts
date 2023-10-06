@@ -1,7 +1,9 @@
 import request from "supertest";
 import app from "../../app";
+import dotenv from 'dotenv';
 
-const api_version: string = 'v1';
+dotenv.config();
+const api_version = process.env.API_VERSION;
 
 interface IUser {
   username: string

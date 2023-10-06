@@ -8,7 +8,7 @@ const access: ConnectionOptions = {
   port: Number(process.env.DB_PORT),
   user: process.env.DB_USER,
   password: process.env.DB_PWD,
-  database: process.env.DB_NAME,
+  database: process.env.NODE_ENV === 'test' ? process.env.DB_TEST: process.env.DB_NAME,
 };
 
 const conn = mysql.createConnection(access);
@@ -206,7 +206,7 @@ const migrateDB = async () => {
   await createTableAction();
 
   conn.destroy();
-  console.log('Migrate DB done...');
+  console.log(`Migrate ${process.env.NODE_ENV} database done...`);
 }
 
 migrateDB();
