@@ -17,7 +17,7 @@ export const connectMysql = () => {
 		return conn;
 	} catch (err) {
 		console.log('Mysql connection error: ', err);
-		return false;
+		throw err;
 	}
 }
 
