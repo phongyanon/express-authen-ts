@@ -1,9 +1,11 @@
 import request from "supertest";
 import app from "../../app";
+import { Controller as UserController } from "../v1/user/controllers";
 import dotenv from 'dotenv';
 
 dotenv.config();
 const api_version = process.env.API_VERSION;
+let userController = new UserController();
 
 interface IUser {
   username: string
@@ -55,8 +57,9 @@ describe("CRUD User", () => {
 
   let result_id: any
 
-  beforeAll(() => {
+  beforeAll(async () => {
     // clear user table
+    // await userController.truncateUser();
   });
 
   test("Get users but empty", async () => {

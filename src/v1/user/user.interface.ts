@@ -4,7 +4,7 @@ export interface IUserSignIn {
   email: string
 }
 
-export interface IUser {
+export interface IUserInsert {
 	username?: string
   email?: string
   is_sso_user?: boolean
@@ -12,8 +12,18 @@ export interface IUser {
   sso_from?: string | null
   status?: string
 }
-  
-export interface IUserResponse {
+ 
+export interface IUserUpdate {
+  id: string
+	username?: string
+  email?: string
+  is_sso_user?: boolean
+  sso_user_id?: string | null
+  sso_from?: string | null
+  status?: string
+}
+
+export interface IUser {
   id: string
   username: string
   email: string
