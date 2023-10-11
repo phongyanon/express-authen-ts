@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Query as MysqlQuery } from './services/mysql';
 import { Query as MongoQuery } from './services/mongo';
-import { IUserInsert, IUserUpdate } from './user.interface';
+import { IUserInsert, IUserUpdate } from './user.type';
 
 dotenv.config();
 

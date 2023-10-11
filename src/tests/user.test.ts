@@ -1,16 +1,27 @@
 import request from "supertest";
 import app from "../../app";
-import { Controller as UserController } from "../v1/user/controllers";
+// import { Controller as UserController } from "../v1/user/controllers";
+import { createMysqlConnection, disconnectMysql, truncateTable } from "../v1/utils/dbConnection";
 import dotenv from 'dotenv';
 
 dotenv.config();
 const api_version = process.env.API_VERSION;
-let userController = new UserController();
+// let userController = new UserController();
 
 interface IUser {
   username: string
   password: string
   email: string
+}
+
+export interface IUserInsert {
+	username?: string
+  password?: string
+  email?: string
+  is_sso_user?: boolean
+  sso_user_id?: string | null
+  sso_from?: string | null
+  status?: string
 }
 
 interface IUserResponse {
@@ -42,24 +53,37 @@ function isIUserResponse(obj: any): obj is IUserResponse {
 
 describe("CRUD User", () => {
 
-  let test_users: IUser[] = [
+  let test_users: IUserInsert[] = [
     {
       username: 'john@email.com',
       password: 'test1234',
-      email: 'john@email.com'
+      email: 'john@email.com',
+      is_sso_user: false,
+      sso_user_id: null,
+      sso_from: null, 
+      status: 'active'
     },
     {
       username: 'doe',
       password: 'test5678',
-      email: 'doe@email.com'
+      email: 'doe@email.com',
+      is_sso_user: false,
+      sso_user_id: null,
+      sso_from: null, 
+      status: 'active'
     },
   ]
 
   let result_id: any
+  let conn_test = createMysqlConnection();
 
-  beforeAll(async () => {
-    // clear user table
-    // await userController.truncateUser();
+  beforeAll( () => {
+    // TODO: create clear user table to script
+    // try {
+    //   truncateTable(conn_test, 'User');
+    // } catch (err) {
+    //   // do nothing
+    // }
   });
 
   test("Get users but empty", async () => {
@@ -78,6 +102,13 @@ describe("CRUD User", () => {
     expect(res.body.message).toBe('Successfully create');
     
     result_id = res.body.id;
+  });
+
+  test("Add user some field to error", async () => {
+    const res = await request(app).post(`/${api_version}/user`).send({ username: 'some_name' });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('error');
   });
 
   test("Get users", async () => {
@@ -185,6 +216,6 @@ describe("CRUD User", () => {
   });
 
   // afterAll(() => {
-
+  //   conn_test.destroy();
   // });
 });

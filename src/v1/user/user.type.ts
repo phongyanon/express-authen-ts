@@ -5,8 +5,10 @@ export interface IUserSignIn {
 }
 
 export interface IUserInsert {
-	username?: string
-  email?: string
+	username: string
+  password: string
+  email: string
+  password_salt?: string | null
   is_sso_user?: boolean
   sso_user_id?: string | null
   sso_from?: string | null
@@ -16,7 +18,9 @@ export interface IUserInsert {
 export interface IUserUpdate {
   id: string
 	username?: string
+  password?: string
   email?: string
+  password_salt?: string
   is_sso_user?: boolean
   sso_user_id?: string | null
   sso_from?: string | null
@@ -26,7 +30,9 @@ export interface IUserUpdate {
 export interface IUser {
   id: string
   username: string
+  password: string
   email: string
+  password_salt: string
   is_sso_user: boolean
   sso_user_id: string | null
   sso_from: string | null

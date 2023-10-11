@@ -1,9 +1,26 @@
 import express, { Application, Request, Response, NextFunction } from "express";
+import * as bodyParser from "body-parser";
+import cors from 'cors';
 
 import { router as userRoutes } from "./src/v1/user/routes";
 
 const app: Application = express();
+const corsOptions: cors.CorsOptions = {
+  origin: '*',
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  preflightContinue: false,
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'X-Access-Token',
+  ],
+}
 
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
 app.use("/v1", userRoutes);
 
 app.use("/", (req: Request, res: Response, next: NextFunction): void => {
