@@ -25,7 +25,7 @@ export class Query {
 					if (err) resolve({error: err.toString()});
 					else {
 						if (row.length === 0) resolve({error: true, message: 'User: item does not exist'});
-						else resolve(row);
+						else resolve(row[0]);
 					}
 			});
 		});
@@ -64,8 +64,9 @@ export class Query {
 
 				}
 			});
+			update_data.push(ctx.id);
 
-			this.con.execute<ResultSetHeader>(`UPDATE User SET ${set_field} WHERE id = ?; `, update_data,
+			this.con.execute<ResultSetHeader>(`UPDATE User SET ${set_field.slice(0, -1)} WHERE id = ?; `, update_data,
 				(err, result) => {
 					if (err) resolve({error: err.toString()});
 					else {
@@ -80,7 +81,7 @@ export class Query {
 
 	deleteUser(id: string){
 		return new Promise( resolve => {
-			this.con.execute<ResultSetHeader>('DELETE * FROM User WHERE id = ?;', [id], 
+			this.con.execute<ResultSetHeader>('DELETE FROM User WHERE id = ?;', [id], 
 				(err, result) => {
 					if (err) resolve({error: err.toString()});
 					else {
@@ -93,9 +94,9 @@ export class Query {
 		});
 	}
 
-	truncateUser() {
+	resetUser() {
 		return new Promise( resolve => {
-			this.con.execute('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE User; SET FOREIGN_KEY_CHECKS = 1; ', 
+			this.con.execute('DELETE FROM User;', 
 				(err, result) => {
 					if (err) throw err
 					resolve(result);

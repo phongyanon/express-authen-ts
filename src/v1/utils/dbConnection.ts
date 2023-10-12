@@ -39,9 +39,11 @@ export const createMysqlConnection = () => {
 		}
 }
 
-export const disconnectMysql = (conn: Connection) => {
+export const disconnectMysql = (conn: Pool) => {
 	try {
-		conn.destroy();
+		conn.getConnection( (err, conns) => {
+			conns.destroy();
+		})
 		return true;		
 	} catch (err) {
 		if (err) throw err
@@ -52,8 +54,8 @@ export const disconnectMysql = (conn: Connection) => {
 	// });
 }
 
-export const truncateTable = (conn: Connection, name: string) => {
-	conn.execute('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE ?; SET FOREIGN_KEY_CHECKS = 1;', [name], 
+export const resetTable = (conn: Connection, name: string) => {
+	conn.execute('DELETE FROM ?;', [name], 
 		(err, results) => {
 			if (err) throw err
 			return true;

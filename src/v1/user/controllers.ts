@@ -51,14 +51,14 @@ export class Controller {
 
 	deleteUser(id: string){
 		return new Promise( async resolve => {
-			let result = await this.query.updateUser(id);
+			let result = await this.query.deleteUser(id);
 			resolve(result);
 		});
 	}
 
-	truncateUser(){
+	resetUser(){
 		return new Promise( async resolve => {
-			let result = await this.query.truncateUser();
+			let result = await this.query.resetUser();
 			resolve(result);
 		});
 	}

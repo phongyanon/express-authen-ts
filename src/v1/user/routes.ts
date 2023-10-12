@@ -8,7 +8,7 @@ let user = new Controller();
 router.get("/users", async (req: Request, res: Response) => {
   let result: any = await user.getUsers();
   if (result.hasOwnProperty('error')) res.status(500).send(result);
-  else res.status(200).send([]);
+  else res.status(200).send(result);
 });
 
 router.get("/user/:id", async (req: Request, res: Response) => {
@@ -29,7 +29,8 @@ router.post("/user", async (req: Request, res: Response) => {
   else res.status(201).send(result);
 });
 
-router.put("/user", async (req: Request, res: Response) => {
+router.put("/user/:id", async (req: Request, res: Response) => {
+  req.body.id = (req.params.id).toString();
   const updateUser: IUserUpdate = req.body;
   let result: any = await user.updateUser(updateUser);
 
