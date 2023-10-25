@@ -13,7 +13,12 @@ export class Query {
 			this.con.execute<RowDataPacket[]>('SELECT * FROM User;',
 				(err, rows) => {
 					if (err) resolve({error: err.toString()});
-					else resolve(rows);
+					else {
+						resolve(rows.map( row => {
+							row.is_sso_user = row.is_sso_user === 0 ? false: true;
+							return row;
+						}));
+					}
 			});
 		});
 	}
@@ -21,6 +26,22 @@ export class Query {
 	getUser(id: string){
 		return new Promise( resolve => {
 			this.con.execute<RowDataPacket[]>('SELECT * FROM User WHERE id = ?;', [id], 
+				(err, row) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'User: item does not exist'});
+						else {
+							row[0].is_sso_user = row[0].is_sso_user === 0 ? false: true;
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
+	getUserByUsername(username: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM User WHERE username = ?;', [username], 
 				(err, row) => {
 					if (err) resolve({error: err.toString()});
 					else {

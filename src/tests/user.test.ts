@@ -134,7 +134,7 @@ describe("CRUD User", () => {
     expect(res.body.username).toBe(test_users[0].username);
 
     expect(res.body.email).toBe(test_users[0].email);
-    expect(res.body.is_sso_user).toBe(0); // false
+    expect(res.body.is_sso_user).toBe(false);
     expect(res.body.sso_user_id).toBe(null);
     expect(res.body.sso_from).toBe(null);
 
@@ -163,7 +163,7 @@ describe("CRUD User", () => {
     expect(res.body.username).toBe(test_users[0].username);
 
     expect(res.body.email).toBe('joen@email.com');
-    expect(res.body.is_sso_user).toBe(1); // true
+    expect(res.body.is_sso_user).toBe(true);
     expect(res.body.sso_user_id).toBe('test');
     expect(res.body.sso_from).toBe('test');
 
@@ -180,28 +180,28 @@ describe("CRUD User", () => {
     expect(res.body.message).toBe('User: update item failed');
   });
 
-  // test("Add user then add duplicated user", async () => {
-  //   await request(app).post(`/${api_version}/user`).send(test_users[1]);
-  //   const res = await request(app).post(`/${api_version}/user`).send(test_users[1]);
+  test("Add user then add duplicated user", async () => {
+    await request(app).post(`/${api_version}/user`).send(test_users[1]);
+    const res = await request(app).post(`/${api_version}/user`).send(test_users[1]);
 
-  //   expect(res.statusCode).toBe(400);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body).toHaveProperty('error');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
 
-  //   expect(res.body.message).toBe('User: Invalid request');
-  //   expect(res.body.error).toBe('Duplicated username');
-  // });
+    expect(res.body.message).toBe('User: Invalid request');
+    expect(res.body.error).toBe('Duplicated username');
+  });
 
-  // test("Get users again", async () => {
-  //   const res = await request(app).get(`/${api_version}/users`);
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body).toHaveLength;
-  //   expect(res.body.length).toBe(2);
+  test("Get users again", async () => {
+    const res = await request(app).get(`/${api_version}/users`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveLength;
+    expect(res.body.length).toBe(2);
 
-  //   res.body.forEach((element: IUserResponse) => {
-  //     expect(isIUserResponse(element)).toBe(true);
-  //   });
-  // });
+    res.body.forEach((element: IUserResponse) => {
+      expect(isIUserResponse(element)).toBe(true);
+    });
+  });
 
   test("Delete User", async () => {
     const res = await request(app).delete(`/${api_version}/user/${result_id}`);
