@@ -7,10 +7,6 @@ import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body } f
 
 dotenv.config();
 
-interface PingResponse {
-  message: string;
-}
-
 @Route("v1")
 export class Controller {
 	query: any
