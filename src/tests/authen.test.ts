@@ -22,6 +22,16 @@ interface IUserSignIn {
   email?: string
 }
 
+describe("Authen method", () => {
+  test("Hash password and check is match", async () => {
+
+  });
+
+  test("Sign jwt", async () => {
+
+  });
+});
+
 describe("Authentication", () => {
 
   let test_users: IUserSignUp[] = [
@@ -51,6 +61,10 @@ describe("Authentication", () => {
 
 	test("Sign up", async () => {
     const res = await request(app).post(`/${api_version}/signup`).send(test_users[0]);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Successfully signup');
   });
 
 	test("Sign up duplicated username", async () => {
@@ -59,6 +73,13 @@ describe("Authentication", () => {
       password: "test1111",
       email: "kaew2@email.com"
     });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+
+    expect(res.body.message).toBe('User: Invalid request');
+    expect(res.body.error).toBe('Duplicated username');
   });
 
 	test("Sign in to get token", async () => {
@@ -66,18 +87,48 @@ describe("Authentication", () => {
       username: test_users[0].username,
       password: test_users[0].password
     });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('refresh_token');
+    expect(res.body).toHaveProperty('access_token');
+  });
+
+  test("Sign in with wrong password", async () => {
+    const res = await request(app).post(`/${api_version}/signin`).send({
+      username: test_users[0].username,
+      password: '1234zzzz'
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+
+    expect(res.body.message).toBe('User: Invalid request');
+    expect(res.body.error).toBe('Wrong username or password');
   });
 
 	test("Get access token status", async () => {
-    const res = await request(app).post(`/${api_version}/token/status`);
+    const res = await request(app).get(`/${api_version}/token/status`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.status).toBe('ok');
   });
 
 	test("Sign out", async () => {
     const res = await request(app).post(`/${api_version}/signout`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.status).toBe('signout');
   });
 
 	test("Get access token status after sign out", async () => {
-    const res = await request(app).post(`/${api_version}/token/status`);
+    const res = await request(app).get(`/${api_version}/token/status`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.status).toBe('expired');
   });
 
 });
