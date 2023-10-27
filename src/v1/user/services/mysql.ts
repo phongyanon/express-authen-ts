@@ -46,7 +46,10 @@ export class Query {
 					if (err) resolve({error: err.toString()});
 					else {
 						if (row.length === 0) resolve({error: true, message: 'User: item does not exist'});
-						else resolve(row[0]);
+						else {
+							row[0].is_sso_user = row[0].is_sso_user === 0 ? false: true;
+							resolve(row[0]);
+						}
 					}
 			});
 		});

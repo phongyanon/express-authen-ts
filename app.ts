@@ -4,6 +4,7 @@ import cors from 'cors';
 import swaggerUi from "swagger-ui-express";
 
 import { router as userRoutes } from "./src/v1/user/routes";
+import { router as tokenRoutes } from "./src/v1/token/routes";
 
 const app: Application = express();
 const corsOptions: cors.CorsOptions = {
@@ -22,9 +23,11 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.use("/v1", userRoutes);
-app.use(express.static("public"));
 
+app.use("/v1", userRoutes);
+app.use("/v1", tokenRoutes);
+
+app.use(express.static("public"));
 app.use(
   "/docs",
   swaggerUi.serve,

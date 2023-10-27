@@ -28,7 +28,7 @@ const createTableUser = () => {
         status ENUM('active', 'inactive'),
         password_expires_at TIMESTAMP,
         create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        update_at TIMESTAMP
+        update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=INNODB;
     `, (err, result) => {
       if (err) throw err;
@@ -56,7 +56,7 @@ const createTableProfile = () => {
         phone INT(255),
         image_profile VARCHAR(255),
         create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        update_at TIMESTAMP
+        update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=INNODB;
     `, (err, result) => {
       if (err) throw err;
@@ -84,7 +84,7 @@ const createTableToken = () => {
         otp_verified BOOLEAN,
         token_salt VARCHAR(255),
         create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        update_at TIMESTAMP  
+        update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=INNODB;
     `, (err, result) => {
       if (err) throw err;
@@ -102,7 +102,7 @@ const createTableSetting = () => {
         enable_reset_password_interval BOOLEAN,
         enable_verify_email BOOLEAN,
         create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        update_at TIMESTAMP     
+        update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=INNODB;
     `, (err, result) => {
       if (err) throw err;

@@ -25,6 +25,216 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IToken": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"refresh_token": {
+						"type": "string"
+					},
+					"refresh_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"refresh_token",
+					"refresh_token_expires_at",
+					"reset_password_token",
+					"reset_password_token_expires_at",
+					"verify_email_token",
+					"verify_email_token_expires_at",
+					"email_verified",
+					"enable_opt",
+					"otp_secret",
+					"otp_verified",
+					"token_salt",
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ISuccessResponse": {
+				"properties": {
+					"error": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "boolean"
+							}
+						]
+					},
+					"message": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ITokenInsert": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"refresh_token": {
+						"type": "string"
+					},
+					"refresh_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"refresh_token",
+					"refresh_token_expires_at",
+					"reset_password_token",
+					"reset_password_token_expires_at",
+					"verify_email_token",
+					"verify_email_token_expires_at",
+					"email_verified",
+					"enable_opt",
+					"otp_secret",
+					"otp_verified",
+					"token_salt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ITokenUpdate": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"refresh_token": {
+						"type": "string"
+					},
+					"refresh_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IUser": {
 				"properties": {
 					"id": {
@@ -68,28 +278,6 @@
 					"sso_from",
 					"status"
 				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ISuccessResponse": {
-				"properties": {
-					"error": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"type": "boolean"
-							}
-						]
-					},
-					"message": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -182,6 +370,237 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
+		"/v1/tokens": {
+			"get": {
+				"operationId": "GetTokens",
+				"responses": {
+					"200": {
+						"description": "Get tsers",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/IToken"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"id": "5",
+												"user_id": "test",
+												"refresh_token": "refresh_token",
+												"refresh_token_expires_at": 1660926192826,
+												"reset_password_token": "reset_password_token",
+												"reset_password_token_expires_at": 1660926192826,
+												"verify_email_token": "email_token",
+												"verify_email_token_expires_at": 1660926192826,
+												"email_verified": false,
+												"enable_opt": false,
+												"otp_secret": "secret",
+												"otp_verified": false,
+												"token_salt": "salt"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/token/{id}": {
+			"get": {
+				"operationId": "GetToken",
+				"responses": {
+					"200": {
+						"description": "Get token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IToken"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "5",
+											"user_id": "test",
+											"refresh_token": "refresh_token",
+											"refresh_token_expires_at": 1660926192826,
+											"reset_password_token": "reset_password_token",
+											"reset_password_token_expires_at": 1660926192826,
+											"verify_email_token": "email_token",
+											"verify_email_token_expires_at": 1660926192826,
+											"email_verified": false,
+											"enable_opt": false,
+											"otp_secret": "secret",
+											"otp_verified": false,
+											"token_salt": "salt"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateToken",
+				"responses": {
+					"200": {
+						"description": "Updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully update",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ITokenUpdate"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteToken",
+				"responses": {
+					"200": {
+						"description": "Deleted",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully delete",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/token": {
+			"post": {
+				"operationId": "AddToken",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully create",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ITokenInsert"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/users": {
 			"get": {
 				"operationId": "GetUsers",

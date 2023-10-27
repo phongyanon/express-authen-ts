@@ -1,22 +1,24 @@
 import request from "supertest";
 import app from "../../app";
-// import { Controller as TokenController } from "../v1/token/controllers";
+import { Controller as TokenController } from "../v1/token/controllers";
+import { Controller as UserController } from "../v1/user/controllers";
 import { IUserInsert } from "./user.test";
 import dotenv from 'dotenv';
 import { before } from "node:test";
 
 dotenv.config();
 const api_version = process.env.API_VERSION;
-// let tokenController = new TokenController();
+let tokenController = new TokenController();
+let userController = new UserController();
 
 export interface ITokenInsert {
 	user_id: string
 	refresh_token?: string
-	refresh_token_expires_at?: string | null
+	refresh_token_expires_at?: number | null
 	reset_password_token?: string | null
-	reset_password_token_expires_at?: string | null
+	reset_password_token_expires_at?: number | null
 	verify_email_token?: string | null
-	verify_email_token_expires_at?: string | null
+	verify_email_token_expires_at?: number | null
 	email_verified?: boolean
 	enable_opt?: boolean
 	otp_secret?: string | null
@@ -28,11 +30,11 @@ interface ITokenResponse {
 	id: string
 	user_id: string
 	refresh_token: string
-	refresh_token_expires_at: string
+	refresh_token_expires_at: number
 	reset_password_token: string
-	reset_password_token_expires_at: string
+	reset_password_token_expires_at: number
 	verify_email_token: string
-	verify_email_token_expires_at: string
+	verify_email_token_expires_at: number
 	email_verified: boolean
 	enable_opt: boolean
 	otp_secret: string
@@ -80,11 +82,11 @@ describe("CRUD Token", () => {
     {
 			user_id: 'test',
       refresh_token: "refresh_token",
-			refresh_token_expires_at: "1660926192826",
+			refresh_token_expires_at: 1660926192000,
 			reset_password_token: "reset_password_token",
-			reset_password_token_expires_at: "1660926192826",
+			reset_password_token_expires_at: 1660926192000,
 			verify_email_token: "email_token", 
-			verify_email_token_expires_at: "1660926192826",
+			verify_email_token_expires_at: 1660926192000,
 			email_verified: false, 
 			enable_opt: false,
 			otp_secret: "secret",
@@ -94,11 +96,11 @@ describe("CRUD Token", () => {
     {
 			user_id: 'test',
       refresh_token: "test",
-			refresh_token_expires_at: "1660926192000",
+			refresh_token_expires_at: 1660926192000,
 			reset_password_token: "test",
-			reset_password_token_expires_at: "1660926192000",
+			reset_password_token_expires_at: 1660926192000,
 			verify_email_token: "test", 
-			verify_email_token_expires_at: "1660926192000",
+			verify_email_token_expires_at: 1660926192000,
 			email_verified: true, 
 			enable_opt: true,
 			otp_secret: "test",
@@ -112,18 +114,12 @@ describe("CRUD Token", () => {
 
   beforeAll( async () => {
     try {
-      // await userController.resetUser();
+      await tokenController.resetToken();
+      await userController.resetUser();
     } catch (err) {
       // do nothing
     }
   });
-
-	before(async () => {
-		const res_user = await request(app).post(`/${api_version}/user`).send(test_user);
-		user_id = res_user.body.id;
-		test_tokens[0].user_id = user_id;
-		test_tokens[1].user_id = user_id;
-	})
 
   test("Get tokens but empty", async () => {
     const res = await request(app).get(`/${api_version}/tokens`);
@@ -133,6 +129,11 @@ describe("CRUD Token", () => {
   });
 
   test("Add token", async () => {
+    const res_user = await request(app).post(`/${api_version}/user`).send(test_user);
+		user_id = res_user.body.id;
+    test_tokens[0].user_id = res_user.body.id.toString();
+		test_tokens[1].user_id = res_user.body.id.toString();
+
 		const res = await request(app).post(`/${api_version}/token`).send(test_tokens[0]);
 
     expect(res.statusCode).toBe(201);
@@ -145,6 +146,27 @@ describe("CRUD Token", () => {
 
   test("Add token some field to error", async () => {
     const res = await request(app).post(`/${api_version}/token`).send({ token_name: 'some_name' });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  test("Add token by unknown user id", async () => {
+    let mock_test :ITokenInsert = {
+			user_id: 'test',
+      refresh_token: "refresh_token",
+			refresh_token_expires_at: 1660926192826,
+			reset_password_token: "reset_password_token",
+			reset_password_token_expires_at: 1660926192826,
+			verify_email_token: "email_token", 
+			verify_email_token_expires_at: 1660926192826,
+			email_verified: false, 
+			enable_opt: false,
+			otp_secret: "secret",
+			otp_verified: false,
+			token_salt: "salt",
+    }
+    const res = await request(app).post(`/${api_version}/token`).send(mock_test);
 
     expect(res.statusCode).toBe(500);
     expect(res.body).toHaveProperty('error');
