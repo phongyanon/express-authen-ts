@@ -15,14 +15,9 @@ export class Query {
 					if (err) resolve({error: err.toString()});
 					else {
 						resolve(rows.map( row => {
-							row.email_verified = row.email_verified === 0 ? false: true;
-							row.enable_opt = row.enable_opt === 0 ? false: true;
-							row.otp_verified = row.otp_verified === 0 ? false: true;
 							row.user_id = row.user_id.toString(); 
-
 							row.refresh_token_expires_at = row.refresh_token_expires_at.valueOf();
-							row.reset_password_token_expires_at = row.reset_password_token_expires_at.valueOf();
-							row.verify_email_token_expires_at = row.verify_email_token_expires_at.valueOf();
+							row.access_token_expires_at = row.access_token_expires_at.valueOf();
 
 							return row;
 						}));
@@ -39,14 +34,9 @@ export class Query {
 					else {
 						if (row.length === 0) resolve({error: true, message: 'Token: item does not exist'});
 						else {
-							row[0].email_verified = row[0].email_verified === 0 ? false: true;
-							row[0].enable_opt = row[0].enable_opt === 0 ? false: true;
-							row[0].otp_verified = row[0].otp_verified === 0 ? false: true;
 							row[0].user_id = row[0].user_id.toString();
-
 							row[0].refresh_token_expires_at = row[0].refresh_token_expires_at.valueOf();
-							row[0].reset_password_token_expires_at = row[0].reset_password_token_expires_at.valueOf();
-							row[0].verify_email_token_expires_at = row[0].verify_email_token_expires_at.valueOf();
+							row[0].access_token_expires_at = row[0].access_token_expires_at.valueOf();
 
 							resolve(row[0]);
 						}
@@ -61,28 +51,16 @@ export class Query {
 				user_id, \
 				refresh_token, \
 				refresh_token_expires_at, \
-				reset_password_token, \
-				reset_password_token_expires_at, \
-				verify_email_token, \
-				verify_email_token_expires_at, \
-				email_verified, \
-				enable_opt, \
-				otp_secret, \
-				otp_verified, \
-				token_salt  \
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ', [
+				access_token, \
+				access_token_expires_at, \
+				description \
+			) VALUES (?, ?, ?, ?, ?, ?); ', [
 				ctx.user_id,
 				ctx.refresh_token,
 				ctx.refresh_token_expires_at !== null ? new Date(ctx.refresh_token_expires_at): null,
-				ctx.reset_password_token,
-				ctx.reset_password_token_expires_at !== null ? new Date(ctx.reset_password_token_expires_at): null,
-				ctx.verify_email_token,
-				ctx.verify_email_token_expires_at !== null ? new Date(ctx.verify_email_token_expires_at): null,
-				ctx.email_verified,
-				ctx.enable_opt,
-				ctx.otp_secret,
-				ctx.otp_verified,
-				ctx.token_salt
+				ctx.access_token,
+				ctx.access_token_expires_at !== null ? new Date(ctx.access_token_expires_at): null,
+				ctx.description
 			], (err, result) => {
 					if (err) resolve({error: err.toString()});
 					else {
@@ -100,15 +78,9 @@ export class Query {
 			let props: string[] = [
 				"refresh_token",
 				"refresh_token_expires_at",
-				"reset_password_token",
-				"reset_password_token_expires_at",
-				"verify_email_token",
-				"verify_email_token_expires_at",
-				"email_verified",
-				"enable_opt",
-				"otp_secret",
-				"otp_verified",
-				"token_salt"
+				"access_token",
+				"access_token_expires_at",
+				"description"
 			];
 			let set_field: string = '';
 			let update_data: any = [];
@@ -120,8 +92,7 @@ export class Query {
 					let key = field as string;
 
 					if ((key === 'refresh_token_expires_at') || 
-							(key === 'reset_password_token_expires_at') || 
-							(key === 'verify_email_token_expires_at')) {
+							(key === 'access_token_expires_at')) {
 						
 						if (ctx[key as keyof ITokenUpdate] !== null) {
 							update_data.push(new Date(ctx[key as keyof ITokenUpdate] as number));

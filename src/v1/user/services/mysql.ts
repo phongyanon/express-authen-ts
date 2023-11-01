@@ -55,6 +55,22 @@ export class Query {
 		});
 	}
 
+	getUserByEmail(email: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM User WHERE email = ?;', [email], 
+				(err, row) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'User: item does not exist'});
+						else {
+							row[0].is_sso_user = row[0].is_sso_user === 0 ? false: true;
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
 	addUser(ctx: IUserInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO User ( \

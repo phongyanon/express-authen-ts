@@ -65,15 +65,13 @@ const createTableProfile = () => {
   });
 }
 
-const createTableToken = () => {
+const createTableVerification = () => {
   return new Promise( resolve => {
     conn.execute(`
-      CREATE TABLE Token (
+      CREATE TABLE Verification (
         id INT(255) AUTO_INCREMENT PRIMARY KEY,
         user_id INT(255),
         FOREIGN KEY (user_id) REFERENCES User(id),
-        refresh_token VARCHAR(255),
-        refresh_token_expires_at TIMESTAMP,
         reset_password_token VARCHAR(255),
         reset_password_token_expires_at TIMESTAMP,
         verify_email_token VARCHAR(255),
@@ -83,6 +81,28 @@ const createTableToken = () => {
         otp_secret VARCHAR(255),
         otp_verified BOOLEAN,
         token_salt VARCHAR(255),
+        create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=INNODB;
+    `, (err, result) => {
+      if (err) throw err;
+      resolve(result);
+    });
+  });
+}
+
+const createTableToken = () => {
+  return new Promise( resolve => {
+    conn.execute(`
+      CREATE TABLE Token (
+        id INT(255) AUTO_INCREMENT PRIMARY KEY,
+        user_id INT(255),
+        FOREIGN KEY (user_id) REFERENCES User(id),
+        refresh_token VARCHAR(255),
+        refresh_token_expires_at TIMESTAMP,
+        access_token VARCHAR(255),
+        access_token_expires_at TIMESTAMP,
+        description VARCHAR(255),
         create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=INNODB;
@@ -195,6 +215,8 @@ const migrateDB = async () => {
 
   await createTableUser();
   await createTableProfile();
+  await createTableVerification();
+
   await createTableToken();
   await createTableSetting();
 

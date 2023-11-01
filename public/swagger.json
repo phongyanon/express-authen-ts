@@ -30,47 +30,27 @@
 					"user_id": {
 						"type": "string"
 					},
+					"access_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"access_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"refresh_token": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"refresh_token_expires_at": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
 					},
-					"reset_password_token": {
+					"description": {
 						"type": "string",
 						"nullable": true
-					},
-					"reset_password_token_expires_at": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"verify_email_token": {
-						"type": "string",
-						"nullable": true
-					},
-					"verify_email_token_expires_at": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"email_verified": {
-						"type": "boolean"
-					},
-					"enable_opt": {
-						"type": "boolean"
-					},
-					"otp_secret": {
-						"type": "string",
-						"nullable": true
-					},
-					"otp_verified": {
-						"type": "boolean"
-					},
-					"token_salt": {
-						"type": "string"
 					},
 					"id": {
 						"type": "string"
@@ -78,17 +58,11 @@
 				},
 				"required": [
 					"user_id",
+					"access_token",
+					"access_token_expires_at",
 					"refresh_token",
 					"refresh_token_expires_at",
-					"reset_password_token",
-					"reset_password_token_expires_at",
-					"verify_email_token",
-					"verify_email_token_expires_at",
-					"email_verified",
-					"enable_opt",
-					"otp_secret",
-					"otp_verified",
-					"token_salt",
+					"description",
 					"id"
 				],
 				"type": "object",
@@ -121,62 +95,36 @@
 					"user_id": {
 						"type": "string"
 					},
+					"access_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"access_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"refresh_token": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"refresh_token_expires_at": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
 					},
-					"reset_password_token": {
+					"description": {
 						"type": "string",
 						"nullable": true
-					},
-					"reset_password_token_expires_at": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"verify_email_token": {
-						"type": "string",
-						"nullable": true
-					},
-					"verify_email_token_expires_at": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"email_verified": {
-						"type": "boolean"
-					},
-					"enable_opt": {
-						"type": "boolean"
-					},
-					"otp_secret": {
-						"type": "string",
-						"nullable": true
-					},
-					"otp_verified": {
-						"type": "boolean"
-					},
-					"token_salt": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"user_id",
+					"access_token",
+					"access_token_expires_at",
 					"refresh_token",
 					"refresh_token_expires_at",
-					"reset_password_token",
-					"reset_password_token_expires_at",
-					"verify_email_token",
-					"verify_email_token_expires_at",
-					"email_verified",
-					"enable_opt",
-					"otp_secret",
-					"otp_verified",
-					"token_salt"
+					"description"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -186,47 +134,27 @@
 					"id": {
 						"type": "string"
 					},
+					"access_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"access_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"refresh_token": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"refresh_token_expires_at": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
 					},
-					"reset_password_token": {
+					"description": {
 						"type": "string",
 						"nullable": true
-					},
-					"reset_password_token_expires_at": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"verify_email_token": {
-						"type": "string",
-						"nullable": true
-					},
-					"verify_email_token_expires_at": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"email_verified": {
-						"type": "boolean"
-					},
-					"enable_opt": {
-						"type": "boolean"
-					},
-					"otp_secret": {
-						"type": "string",
-						"nullable": true
-					},
-					"otp_verified": {
-						"type": "boolean"
-					},
-					"token_salt": {
-						"type": "string"
 					}
 				},
 				"required": [
@@ -356,6 +284,166 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"IVerification": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"reset_password_token",
+					"reset_password_token_expires_at",
+					"verify_email_token",
+					"verify_email_token_expires_at",
+					"email_verified",
+					"enable_opt",
+					"otp_secret",
+					"otp_verified",
+					"token_salt",
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IVerificationInsert": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"reset_password_token",
+					"reset_password_token_expires_at",
+					"verify_email_token",
+					"verify_email_token_expires_at",
+					"email_verified",
+					"enable_opt",
+					"otp_secret",
+					"otp_verified",
+					"token_salt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IVerificationUpdate": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -397,17 +485,11 @@
 											{
 												"id": "5",
 												"user_id": "test",
+												"access_token": "access_token",
+												"access_token_expires_at": 1660926192000,
 												"refresh_token": "refresh_token",
-												"refresh_token_expires_at": 1660926192826,
-												"reset_password_token": "reset_password_token",
-												"reset_password_token_expires_at": 1660926192826,
-												"verify_email_token": "email_token",
-												"verify_email_token_expires_at": 1660926192826,
-												"email_verified": false,
-												"enable_opt": false,
-												"otp_secret": "secret",
-												"otp_verified": false,
-												"token_salt": "salt"
+												"refresh_token_expires_at": 1660926192000,
+												"description": "secret"
 											}
 										]
 									}
@@ -443,17 +525,11 @@
 										"value": {
 											"id": "5",
 											"user_id": "test",
+											"access_token": "access_token",
+											"access_token_expires_at": 1660926192000,
 											"refresh_token": "refresh_token",
-											"refresh_token_expires_at": 1660926192826,
-											"reset_password_token": "reset_password_token",
-											"reset_password_token_expires_at": 1660926192826,
-											"verify_email_token": "email_token",
-											"verify_email_token_expires_at": 1660926192826,
-											"email_verified": false,
-											"enable_opt": false,
-											"otp_secret": "secret",
-											"otp_verified": false,
-											"token_salt": "salt"
+											"refresh_token_expires_at": 1660926192000,
+											"description": "secret"
 										}
 									}
 								}
@@ -818,6 +894,233 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/IUserInsert"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/verifications": {
+			"get": {
+				"operationId": "GetVerifications",
+				"responses": {
+					"200": {
+						"description": "Get tsers",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/IVerification"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"id": "5",
+												"user_id": "test",
+												"reset_password_token": "reset_password_token",
+												"reset_password_token_expires_at": 1660926192826,
+												"verify_email_token": "email_token",
+												"verify_email_token_expires_at": 1660926192826,
+												"email_verified": false,
+												"enable_opt": false,
+												"otp_secret": "secret",
+												"otp_verified": false,
+												"token_salt": "salt"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/verification/{id}": {
+			"get": {
+				"operationId": "GetVerification",
+				"responses": {
+					"200": {
+						"description": "Get verification",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IVerification"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "5",
+											"user_id": "test",
+											"reset_password_token": "reset_password_token",
+											"reset_password_token_expires_at": 1660926192826,
+											"verify_email_token": "email_token",
+											"verify_email_token_expires_at": 1660926192826,
+											"email_verified": false,
+											"enable_opt": false,
+											"otp_secret": "secret",
+											"otp_verified": false,
+											"token_salt": "salt"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateVerification",
+				"responses": {
+					"200": {
+						"description": "Updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully update",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IVerificationUpdate"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteVerification",
+				"responses": {
+					"200": {
+						"description": "Deleted",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully delete",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/verification": {
+			"post": {
+				"operationId": "AddVerification",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully create",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IVerificationInsert"
 							}
 						}
 					}

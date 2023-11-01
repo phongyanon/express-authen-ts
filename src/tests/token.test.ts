@@ -1,62 +1,45 @@
 import request from "supertest";
 import app from "../../app";
+import { Controller as VerificationController } from "../v1/verification/controllers";
 import { Controller as TokenController } from "../v1/token/controllers";
 import { Controller as UserController } from "../v1/user/controllers";
 import { IUserInsert } from "./user.test";
 import dotenv from 'dotenv';
-import { before } from "node:test";
 
 dotenv.config();
 const api_version = process.env.API_VERSION;
 let tokenController = new TokenController();
+let verificationController = new VerificationController();
 let userController = new UserController();
 
 export interface ITokenInsert {
 	user_id: string
-	refresh_token?: string
-	refresh_token_expires_at?: number | null
-	reset_password_token?: string | null
-	reset_password_token_expires_at?: number | null
-	verify_email_token?: string | null
-	verify_email_token_expires_at?: number | null
-	email_verified?: boolean
-	enable_opt?: boolean
-	otp_secret?: string | null
-	otp_verified?: boolean
-	token_salt?: string
+  access_token?: string | null
+  access_token_expires_at?: number | null
+  refresh_token?: string | null
+  refresh_token_expires_at?: number | null
+  description?: string | null
 }
 
 interface ITokenResponse {
 	id: string
 	user_id: string
-	refresh_token: string
-	refresh_token_expires_at: number
-	reset_password_token: string
-	reset_password_token_expires_at: number
-	verify_email_token: string
-	verify_email_token_expires_at: number
-	email_verified: boolean
-	enable_opt: boolean
-	otp_secret: string
-	otp_verified: boolean
-	token_salt: string
+	access_token: string
+  access_token_expires_at: number
+  refresh_token: string
+  refresh_token_expires_at: number
+  description: string
 }
 
 function isITokenResponse(obj: any): obj is ITokenResponse {
   const keysOfProps: string[] = [
     "id",
 		"user_id",
-		"refresh_token",
-		"refresh_token_expires_at",
-		"reset_password_token",
-		"reset_password_token_expires_at",
-		"verify_email_token",
-		"verify_email_token_expires_at",
-		"email_verified",
-		"enable_opt",
-		"otp_secret",
-		"otp_verified",
-		"token_salt",
+    "access_token",
+    "access_token_expires_at",
+    "refresh_token",
+    "refresh_token_expires_at",
+    "description"
   ] 
   let result: boolean = true;
   keysOfProps.forEach( (key: string) => {
@@ -81,31 +64,19 @@ describe("CRUD Token", () => {
   let test_tokens: ITokenInsert[] = [
     {
 			user_id: 'test',
-      refresh_token: "refresh_token",
+			access_token: "access_token",
+			access_token_expires_at: 1660926192000,
+			refresh_token: "refresh_token", 
 			refresh_token_expires_at: 1660926192000,
-			reset_password_token: "reset_password_token",
-			reset_password_token_expires_at: 1660926192000,
-			verify_email_token: "email_token", 
-			verify_email_token_expires_at: 1660926192000,
-			email_verified: false, 
-			enable_opt: false,
-			otp_secret: "secret",
-			otp_verified: false,
-			token_salt: "salt",
+			description: "secret"
     },
     {
 			user_id: 'test',
-      refresh_token: "test",
+			access_token: "test",
+			access_token_expires_at: 1660926192000,
+			refresh_token: "test", 
 			refresh_token_expires_at: 1660926192000,
-			reset_password_token: "test",
-			reset_password_token_expires_at: 1660926192000,
-			verify_email_token: "test", 
-			verify_email_token_expires_at: 1660926192000,
-			email_verified: true, 
-			enable_opt: true,
-			otp_secret: "test",
-			otp_verified: true,
-			token_salt: "test",
+			description: "test"
     },
   ]
 
@@ -114,6 +85,7 @@ describe("CRUD Token", () => {
 
   beforeAll( async () => {
     try {
+      await verificationController.resetVerification();
       await tokenController.resetToken();
       await userController.resetUser();
     } catch (err) {
@@ -121,14 +93,14 @@ describe("CRUD Token", () => {
     }
   });
 
-  test("Get tokens but empty", async () => {
+  test("Get Tokens but empty", async () => {
     const res = await request(app).get(`/${api_version}/tokens`);
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveLength;
     expect(res.body.length).toEqual(0);
   });
 
-  test("Add token", async () => {
+  test("Add Token", async () => {
     const res_user = await request(app).post(`/${api_version}/user`).send(test_user);
 		user_id = res_user.body.id;
     test_tokens[0].user_id = res_user.body.id.toString();
@@ -144,7 +116,7 @@ describe("CRUD Token", () => {
     result_id = res.body.id;
   });
 
-  test("Add token some field to error", async () => {
+  test("Add Token some field to error", async () => {
     const res = await request(app).post(`/${api_version}/token`).send({ token_name: 'some_name' });
 
     expect(res.statusCode).toBe(500);
@@ -154,17 +126,11 @@ describe("CRUD Token", () => {
   test("Add token by unknown user id", async () => {
     let mock_test :ITokenInsert = {
 			user_id: 'test',
-      refresh_token: "refresh_token",
-			refresh_token_expires_at: 1660926192826,
-			reset_password_token: "reset_password_token",
-			reset_password_token_expires_at: 1660926192826,
-			verify_email_token: "email_token", 
-			verify_email_token_expires_at: 1660926192826,
-			email_verified: false, 
-			enable_opt: false,
-			otp_secret: "secret",
-			otp_verified: false,
-			token_salt: "salt",
+			access_token: "access_token",
+			access_token_expires_at: 1660926192000,
+			refresh_token: "refresh_token", 
+			refresh_token_expires_at: 1660926192000,
+			description: "secret"
     }
     const res = await request(app).post(`/${api_version}/token`).send(mock_test);
 
@@ -189,27 +155,20 @@ describe("CRUD Token", () => {
     expect(isITokenResponse(res.body)).toBe(true);
     expect(res.body.user_id).toBe(test_tokens[0].user_id);
 
+		expect(res.body.access_token).toBe(test_tokens[0].access_token);
+		expect(res.body.access_token_expires_at).toBe(test_tokens[0].access_token_expires_at);
+
 		expect(res.body.refresh_token).toBe(test_tokens[0].refresh_token);
-		expect(res.body.refresh_token_expires_at).toBe(test_tokens[0].refresh_token_expires_at);
-		expect(res.body.reset_password_token).toBe(test_tokens[0].reset_password_token);
-		expect(res.body.reset_password_token_expires_at).toBe(test_tokens[0].reset_password_token_expires_at);
-
-		expect(res.body.verify_email_token).toBe(test_tokens[0].verify_email_token);
-    expect(res.body.verify_email_token_expires_at).toBe(test_tokens[0].verify_email_token_expires_at);
-    expect(res.body.email_verified).toBe(test_tokens[0].email_verified);
-    expect(res.body.enable_opt).toBe(test_tokens[0].enable_opt);
-
-		expect(res.body.otp_secret).toBe(test_tokens[0].otp_secret);
-		expect(res.body.otp_verified).toBe(test_tokens[0].otp_verified);
-		expect(res.body.token_salt).toBe(test_tokens[0].token_salt);
+    expect(res.body.refresh_token_expires_at).toBe(test_tokens[0].refresh_token_expires_at);
+    expect(res.body.description).toBe(test_tokens[0].description);
   });
 
   test("Update token", async () => {
     const res = await request(app).put(`/${api_version}/token/${result_id}`).send({
-      email_verified: true,
-			enable_opt: true,
-			otp_secret: "update_secret",
-			otp_verified: true,
+      access_token: "new_access_token",
+			access_token_expires_at: 1660926199000,
+			refresh_token: "new_refresh_token", 
+			refresh_token_expires_at: 1660926199000,
     });
 
     expect(res.statusCode).toBe(200);
@@ -224,15 +183,15 @@ describe("CRUD Token", () => {
     expect(isITokenResponse(res.body)).toBe(true);
 		expect(res.body.user_id).toBe(test_tokens[0].user_id);
 
-    expect(res.body.email_verified).toBe(true);
-    expect(res.body.enable_opt).toBe(true);
-    expect(res.body.otp_secret).toBe('update_secret');
-    expect(res.body.otp_verified).toBe(true);
+    expect(res.body.access_token).toBe('new_access_token');
+    expect(res.body.access_token_expires_at).toBe(1660926199000);
+    expect(res.body.refresh_token).toBe('new_refresh_token');
+    expect(res.body.refresh_token_expires_at).toBe(1660926199000);
   });
 
   test("Update token not found", async () => {
     const res = await request(app).put(`/${api_version}/token/9999999`).send({
-      otp_secret: 'joen@update_secret.com'
+      access_token: 'newer_access_token'
     });
 
     expect(res.statusCode).toBe(404);

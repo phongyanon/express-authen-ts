@@ -6,3 +6,13 @@ export interface IResponse {
 export interface ISuccessResponse extends IResponse {
     id?: string
 }
+
+export interface IAccessTokenPayload {
+    uid: string
+    username: string
+}
+
+export interface IRefreshTokenPayload {
+    uid: string
+    username: string
+}

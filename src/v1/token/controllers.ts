@@ -29,17 +29,11 @@ export class Controller {
 	@Example<IToken[]>([{
 		id: '5',
 		user_id: 'test',
-    refresh_token: "refresh_token",
-		refresh_token_expires_at: 1660926192826,
-		reset_password_token: "reset_password_token",
-		reset_password_token_expires_at: 1660926192826,
-		verify_email_token: "email_token", 
-		verify_email_token_expires_at: 1660926192826,
-		email_verified: false, 
-		enable_opt: false,
-		otp_secret: "secret",
-		otp_verified: false,
-		token_salt: "salt",
+		access_token: "access_token",
+		access_token_expires_at: 1660926192000,
+		refresh_token: "refresh_token", 
+		refresh_token_expires_at: 1660926192000,
+		description: "secret"
   }])
 	getTokens(): Promise<IResponse | IToken[]>{
 		return new Promise( async resolve => {
@@ -53,17 +47,11 @@ export class Controller {
 	@Example<IToken>({
 		id: '5',
 		user_id: 'test',
-    refresh_token: "refresh_token",
-		refresh_token_expires_at: 1660926192826,
-		reset_password_token: "reset_password_token",
-		reset_password_token_expires_at: 1660926192826,
-		verify_email_token: "email_token", 
-		verify_email_token_expires_at: 1660926192826,
-		email_verified: false, 
-		enable_opt: false,
-		otp_secret: "secret",
-		otp_verified: false,
-		token_salt: "salt",
+		access_token: "access_token",
+		access_token_expires_at: 1660926192000,
+		refresh_token: "refresh_token", 
+		refresh_token_expires_at: 1660926192000,
+		description: "secret"
   })
 	getToken(@Path() id: string): Promise<IResponse | IToken>{
 		return new Promise( async resolve => {

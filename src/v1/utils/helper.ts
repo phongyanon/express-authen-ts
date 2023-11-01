@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt, { Secret, JwtPayload } from "jsonwebtoken";
+import { IAccessTokenPayload, IRefreshTokenPayload } from "./common.type";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -19,20 +20,20 @@ export const genSalt = (saltRounds: number) => {
 	return bcrypt.genSaltSync(saltRounds);
 }
 
-export const genAccessToken = async (payload: any) => {
+export const genAccessToken = async (payload: IAccessTokenPayload) => {
 	try {
 		let token: string = await jwt.sign(payload, accessSecret as Secret, { expiresIn: '1d' }); // HMAC SHA256
-		return { success: true, result: token};
+		return { success: true, result: token };
 	} catch (err) {
 		console.log('genAccessToken: ', err);
 		return { success: false, result: null };
 	}
 }
 
-export const genRefreshToken = async (payload: any) => {
+export const genRefreshToken = async (payload: IRefreshTokenPayload) => {
 	try {
 		let token: string = await jwt.sign(payload, refreshSecret as Secret, { expiresIn: '7d' }); // HMAC SHA256
-		return { success: true, result: token};
+		return { success: true, result: token };
 	} catch (err) {
 		console.log('genRefreshToken: ', err);
 		return { success: false, result: null };
@@ -41,8 +42,8 @@ export const genRefreshToken = async (payload: any) => {
 
 const verifyJWT = async (token: string, secret: Secret) => {
 	try {
-		var decoded = jwt.verify(token, secret);
-		return { success: true, result: decoded };
+		let decoded = jwt.verify(token, secret);
+		return { success: true, result: decoded as JwtPayload };
 	} catch(err) {
 		console.log('verifyJWT: ', err);
 		return { success: false, result: null };
