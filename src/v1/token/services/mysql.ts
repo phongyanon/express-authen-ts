@@ -45,6 +45,27 @@ export class Query {
 		});
 	}
 
+	getTokenByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM Token WHERE user_id = ?;', [user_id], 
+				(err, rows) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (rows.length === 0) resolve({error: true, message: 'Token: item does not exist'});
+						else {
+							resolve(rows.map( row => {
+								row.user_id = row.user_id.toString(); 
+								row.refresh_token_expires_at = row.refresh_token_expires_at.valueOf();
+								row.access_token_expires_at = row.access_token_expires_at.valueOf();
+	
+								return row;
+							}));
+						}
+					}
+			});
+		});
+	}
+
 	addToken(ctx: ITokenInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO Token ( \
@@ -130,6 +151,21 @@ export class Query {
 					else {
 						if(result.affectedRows === 1){
 							resolve({message: "Successfully delete", id: id});
+						} 
+						else resolve({error: true, message: 'Token: delete item failed'});
+					}
+			});
+		});
+	}
+
+	deleteTokenByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<ResultSetHeader>('DELETE FROM Token WHERE user_id = ?;', [user_id], 
+				(err, result) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if(result.affectedRows > 0){
+							resolve({message: "Successfully delete", deletedItems: result.affectedRows});
 						} 
 						else resolve({error: true, message: 'Token: delete item failed'});
 					}

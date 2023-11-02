@@ -25,6 +25,104 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ISuccessResponse": {
+				"properties": {
+					"error": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "boolean"
+							}
+						]
+					},
+					"message": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUserSignUp": {
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"password",
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ISignInResponse": {
+				"properties": {
+					"access_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"refresh_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"access_token",
+					"refresh_token"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUserSignIn": {
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"info": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"username",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IStatusToken": {
+				"properties": {
+					"status": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IToken": {
 				"properties": {
 					"user_id": {
@@ -65,28 +163,6 @@
 					"description",
 					"id"
 				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ISuccessResponse": {
-				"properties": {
-					"error": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"type": "boolean"
-							}
-						]
-					},
-					"message": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -458,6 +534,160 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
+		"/v1/signup": {
+			"post": {
+				"operationId": "SignUp",
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully signup",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUserSignUp"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/signin": {
+			"post": {
+				"operationId": "SignIn",
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISignInResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"access_token": "your_access_token",
+											"refresh_token": "your_refresh_token"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUserSignIn"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/signout": {
+			"post": {
+				"operationId": "SignOut",
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "signout"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/status/token": {
+			"get": {
+				"operationId": "GetTokenStatus",
+				"responses": {
+					"200": {
+						"description": "Get token status",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IStatusToken"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"status": "ok"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/v1/tokens": {
 			"get": {
 				"operationId": "GetTokens",

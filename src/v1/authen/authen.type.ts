@@ -1,6 +1,7 @@
 export interface IUserSignIn {
     username: string
     password: string
+    info?: string | null
 }
 
 export interface IUserSignUp {
@@ -34,4 +35,8 @@ export interface IRefreshTokenPayload {
 export interface ITokenMethodResponse {
     success: boolean
     result: string | null
+}
+
+export interface IStatusToken {
+    status: string
 }

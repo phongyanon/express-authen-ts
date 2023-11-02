@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import { Query as UserMysqlQuery } from '../user/services/mysql';
 import { Query as UserMongoQuery } from '../user/services/mongo';
+import { Query as TokenMysqlQuery } from '../token/services/mysql';
+import { Query as TokenMongoQuery } from '../token/services/mongo';
 import { IUserInsert } from '../user/user.type';
 import { 
 	IUserSignUp, 
@@ -9,9 +11,12 @@ import {
 	ISignOutResponse, 
 	IAccessTokenPayload,
 	IRefreshTokenPayload,
-	ITokenMethodResponse 
+	ITokenMethodResponse,
+	IStatusToken
 } from './authen.type';
 import { IResponse, ISuccessResponse } from "../utils/common.type";
+import { IToken } from '../token/token.type';
+import { Request as Req } from "express";
 import { 
   hashPassword, 
   genSalt, 
@@ -19,27 +24,33 @@ import {
   genAccessToken, 
   genRefreshToken, 
   verifyAccessToken, 
-  verifyRefreshToken 
+  verifyRefreshToken,
+	addMinutes
 } from "../utils/helper";
-import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body } from "tsoa";
+import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Request } from "tsoa";
 
 dotenv.config();
 
 @Route("v1")
 export class Controller {
 	userQuery: any
+	tokenQuery: any
   constructor(){
 		let UserQuery;
+		let TokenQuery;
 		switch(process.env.DB_TYPE){
 				case('mysql'):
 					UserQuery = new UserMysqlQuery();
+					TokenQuery = new TokenMysqlQuery();
 					break;
 				case('mongo'):
 					UserQuery = new UserMongoQuery();
+					TokenQuery = new TokenMongoQuery();
 					break;
 		}
 		
 		this.userQuery = UserQuery;
+		this.tokenQuery = TokenQuery;
 	}
 
 	@Post("signup")
@@ -61,7 +72,11 @@ export class Controller {
 						username: ctx.username,
 						password: hashPassword(ctx.password, salt),
 						email: ctx.email,
-						password_salt: salt
+						password_salt: salt,
+						is_sso_user: false, 
+						sso_user_id: null, 
+						sso_from: null, 
+						status: 'active'
 					}
 
 					let result = await this.userQuery.addUser(newUser);
@@ -111,7 +126,25 @@ export class Controller {
 					let result_refresh: ITokenMethodResponse = await genRefreshToken(refresh_payload);
 
 					if ( (result_access.success === true) && (result_refresh.success === true) ){
-						resolve({access_token: result_access.result, refresh_token: result_refresh.result})
+						let date: Date = new Date();
+						let salt: string = genSalt(5);
+						
+						let add_token = await this.tokenQuery.addToken({
+							user_id: check_user.id,
+							refresh_token: hashPassword(result_access.result as string, salt), 
+							refresh_token_expires_at: addMinutes(date, 60*24), 
+						
+							access_token: hashPassword(result_refresh.result as string, salt),
+							access_token_expires_at: addMinutes(date, 60*24*7), 
+							description: ctx.hasOwnProperty('info') ? ctx.info : ''
+						});
+
+						if (add_token.message === "Successfully create") {
+							resolve({access_token: result_access.result, refresh_token: result_refresh.result})
+						} else {
+							resolve(add_token);
+						}
+
 					} else {
 						resolve({error: true, message: 'Authen: Invalid request'});
 					}
@@ -120,6 +153,53 @@ export class Controller {
 				}
 			}
 			
+		});
+	}
+
+	@Post("signout")
+  @SuccessResponse("200", "Success")
+	@Example<ISuccessResponse>({
+		"message": "signout"
+  })
+	signOut(@Request() req: Req): Promise<IResponse | ISuccessResponse>{
+		return new Promise( async resolve => {
+			// delete all token by user_id.
+			// client (frontend) should delete tokens in localstorage or cookies.
+			let del_token = await this.tokenQuery.deleteTokenByUserId(req.body.token.uid);
+			if (del_token.hasOwnProperty('message')){
+				if (del_token.message === 'Successfully delete'){
+					resolve({message: 'signout'})
+				}
+				else {
+					resolve(del_token);
+				}
+			} else {
+				resolve(del_token);
+			}
+		});
+	}
+
+	@Get("/status/token")
+	@SuccessResponse("200", "Get token status")
+	@Example<IStatusToken>({
+		status: 'ok'
+  })
+	getTokenStatus(@Request() req: Req ): Promise<IResponse | IStatusToken>{ // token: string, user_id: string
+		return new Promise( async resolve => {
+			let rawToken: string = req.body.rawToken;
+			let user_tokens = await this.tokenQuery.getTokenByUserId(req.body.token.uid);
+			if (user_tokens.hasOwnProperty('error')) resolve(user_tokens);
+			else {
+
+				user_tokens.forEach( (obj: IToken) =>  {
+					if ((comparePassword(rawToken, obj.access_token as string)) || (comparePassword(rawToken, obj.refresh_token as string))){
+						resolve({status: 'ok'});
+					}
+				});
+				
+				resolve({status: 'expired'});
+
+			}
 		});
 	}
 

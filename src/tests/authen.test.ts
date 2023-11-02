@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../app";
 import dotenv from 'dotenv';
-import { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { Controller as VerificationController } from "../v1/verification/controllers";
 import { Controller as TokenController } from "../v1/token/controllers";
 import { Controller as UserController } from "../v1/user/controllers";
@@ -21,6 +21,8 @@ let userController = new UserController();
 
 dotenv.config();
 const api_version = process.env.API_VERSION;
+const accessSecret = process.env.ACCESS_TOKEN_SECRET;
+const refreshSecret = process.env.ACCESS_TOKEN_SECRET;
 
 interface IUserSignUp {
   username: string
@@ -94,7 +96,7 @@ describe("Authentication", () => {
     }
   ]
 
-  let result_id: any
+  let user_id: any
   let result_signin: any
 
   beforeAll( async () => {
@@ -154,6 +156,17 @@ describe("Authentication", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('refresh_token');
     expect(res.body).toHaveProperty('access_token');
+
+    let decoded: any = jwt.verify(res.body.access_token, accessSecret as Secret);
+    const res_token = await request(app).get(`/${api_version}/token/${decoded.uid}`);
+    expect(res_token.statusCode).toBe(200);
+
+    expect(res_token.body).toHaveProperty('refresh_token');
+    expect(res_token.body).toHaveProperty('access_token');
+    expect(res_token.body).toHaveProperty('refresh_token_expires_at');
+
+    expect(res_token.body).toHaveProperty('access_token_expires_at');
+    expect(res_token.body).toHaveProperty('description');
   });
 
   test("Sign in with wrong password", async () => {
@@ -174,7 +187,7 @@ describe("Authentication", () => {
     const res = await request(app).get(`/${api_version}/token/status`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('status');
     expect(res.body.status).toBe('ok');
   });
 
@@ -191,14 +204,14 @@ describe("Authentication", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('message');
-    expect(res.body.status).toBe('signout');
+    expect(res.body.message).toBe('signout');
   });
 
 	test("Get access token status after sign out", async () => {
     const res = await request(app).get(`/${api_version}/token/status`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('status');
     expect(res.body.status).toBe('expired');
   });
 

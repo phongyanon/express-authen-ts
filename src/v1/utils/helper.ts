@@ -57,3 +57,8 @@ export const verifyAccessToken = async (token: string) => {
 export const verifyRefreshToken = async (token: string) => {
 	return verifyJWT(token, refreshSecret as Secret);
 }
+
+export const addMinutes = (date: Date, minutes: number) => {
+	date.setMinutes(date.getMinutes() + minutes);
+	return Math.floor(date.valueOf() / 1000)
+}
