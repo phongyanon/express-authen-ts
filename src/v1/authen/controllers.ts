@@ -12,7 +12,10 @@ import {
 	IAccessTokenPayload,
 	IRefreshTokenPayload,
 	ITokenMethodResponse,
-	IStatusToken
+	IStatusToken,
+	IAuthRefreshToken,
+	IAuthRefreshTokenResp,
+	IVerifyToken
 } from './authen.type';
 import { IResponse, ISuccessResponse } from "../utils/common.type";
 import { IToken } from '../token/token.type';
@@ -80,8 +83,22 @@ export class Controller {
 					}
 
 					let result = await this.userQuery.addUser(newUser);
-					resolve(result);
-				}
+					if (result.hasOwnProperty('error')) resolve(result);
+					else resolve({message: 'Successfully signup', id: result.id});
+					
+				} else resolve({error: 'Duplicated username or email', message: 'Authen: Invalid request'});
+
+			} else if (check_user.hasOwnProperty('message')) {
+
+				if (check_user.message === 'User: item does not exist') {
+					resolve({error: 'Duplicated username or email', message: 'Authen: Invalid request'});
+				} else resolve(check_user);
+
+			} else if (check_email.hasOwnProperty('message')) {
+
+				if (check_email.message === 'User: item does not exist') {
+					resolve({error: 'Duplicated username or email', message: 'Authen: Invalid request'});
+				} else resolve(check_email);
 
 			} else if (check_user.hasOwnProperty('error')) {
 				resolve(check_user);
@@ -165,16 +182,20 @@ export class Controller {
 		return new Promise( async resolve => {
 			// delete all token by user_id.
 			// client (frontend) should delete tokens in localstorage or cookies.
-			let del_token = await this.tokenQuery.deleteTokenByUserId(req.body.token.uid);
-			if (del_token.hasOwnProperty('message')){
-				if (del_token.message === 'Successfully delete'){
-					resolve({message: 'signout'})
-				}
-				else {
-					resolve(del_token);
-				}
-			} else {
-				resolve(del_token);
+			let rawToken: string = req.body.rawToken;
+			let user_tokens = await this.tokenQuery.getTokenByUserId(req.body.token.uid);
+			if (user_tokens.hasOwnProperty('error')) resolve(user_tokens);
+			else {
+				user_tokens.forEach( async (obj: IToken) => {
+					if (comparePassword(rawToken, obj.access_token as string)) {
+						let del_token = await this.tokenQuery.deleteTokenByUserId(obj.id);
+						if (del_token.message === 'Successfully delete'){
+							resolve({message: 'signout'});
+						}
+
+						resolve(del_token);
+					}
+				});
 			}
 		});
 	}
@@ -188,7 +209,9 @@ export class Controller {
 		return new Promise( async resolve => {
 			let rawToken: string = req.body.rawToken;
 			let user_tokens = await this.tokenQuery.getTokenByUserId(req.body.token.uid);
-			if (user_tokens.hasOwnProperty('error')) resolve(user_tokens);
+			if (user_tokens.hasOwnProperty('error')) {
+				resolve(user_tokens);
+			}
 			else {
 
 				user_tokens.forEach( (obj: IToken) =>  {
@@ -199,6 +222,53 @@ export class Controller {
 				
 				resolve({status: 'expired'});
 
+			}
+		});
+	}
+
+	@Post("/auth/refresh/token")
+  @SuccessResponse("200", "Success")
+	@Example<IAuthRefreshTokenResp>({
+		"refresh_token": "current_refresh_token",
+		"refresh_token_expires_at": "1660926192000",
+		"access_token": "new_access_token",
+		"access_token_expires_at": "1660926492000"
+  })
+	authRefreshToken(@Path() body: IAuthRefreshToken): Promise<IResponse | IAuthRefreshTokenResp>{
+		return new Promise( async resolve => {
+    	let verify_refresh: IVerifyToken = await verifyRefreshToken(body.refresh_token as string);
+			if (verify_refresh.success === true){
+				let refresh_payload: IRefreshTokenPayload = verify_refresh.result as IRefreshTokenPayload
+
+				let access_payload: IAccessTokenPayload = { uid: refresh_payload.uid, username: refresh_payload.username }
+				let result_access: ITokenMethodResponse = await genAccessToken(access_payload);
+
+				// TODO: coding from here
+				resolve({error: true, message: 'Authen: Invalid request'}) // delete this
+
+			} else {
+				resolve({error: true, message: 'Authen: Invalid request'})
+			}
+		});
+	}
+
+	@Post("/revoke/token")
+  @SuccessResponse("200", "Success")
+	@Example<ISuccessResponse>({
+		"message": "success"
+  })
+	revokeToken(@Path() user_id: string): Promise<IResponse | ISuccessResponse>{
+		return new Promise( async resolve => {
+			let del_token = await this.tokenQuery.deleteTokenByUserId(user_id);
+			if (del_token.hasOwnProperty('message')){
+				if (del_token.message === 'Successfully delete'){
+					resolve({message: 'success'})
+				}
+				else {
+					resolve(del_token);
+				}
+			} else {
+				resolve(del_token);
 			}
 		});
 	}

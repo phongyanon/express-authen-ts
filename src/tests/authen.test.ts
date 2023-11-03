@@ -96,8 +96,9 @@ describe("Authentication", () => {
     }
   ]
 
-  let user_id: any
-  let result_signin: any
+  let user_id: string
+  let result_access_token: string
+  let result_refresh_token: string
 
   beforeAll( async () => {
     try {
@@ -114,7 +115,10 @@ describe("Authentication", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('id');
     expect(res.body.message).toBe('Successfully signup');
+    
+    user_id = res.body.id;
   });
 
 	test("Sign up duplicated username", async () => {
@@ -157,16 +161,8 @@ describe("Authentication", () => {
     expect(res.body).toHaveProperty('refresh_token');
     expect(res.body).toHaveProperty('access_token');
 
-    let decoded: any = jwt.verify(res.body.access_token, accessSecret as Secret);
-    const res_token = await request(app).get(`/${api_version}/token/${decoded.uid}`);
-    expect(res_token.statusCode).toBe(200);
-
-    expect(res_token.body).toHaveProperty('refresh_token');
-    expect(res_token.body).toHaveProperty('access_token');
-    expect(res_token.body).toHaveProperty('refresh_token_expires_at');
-
-    expect(res_token.body).toHaveProperty('access_token_expires_at');
-    expect(res_token.body).toHaveProperty('description');
+    result_access_token = res.body.access_token;
+    result_refresh_token = res.body.refresh_token;
   });
 
   test("Sign in with wrong password", async () => {
@@ -184,7 +180,9 @@ describe("Authentication", () => {
   });
 
 	test("Get access token status", async () => {
-    const res = await request(app).get(`/${api_version}/token/status`);
+    const res = await request(app)
+      .get(`/${api_version}/status/token`)
+      .set('Authorization', `Bearer ${result_access_token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('status');
@@ -192,15 +190,60 @@ describe("Authentication", () => {
   });
 
   test("Get access token status not found", async () => {
-    const res = await request(app).get(`/${api_version}/token/status`);
+    const res = await request(app)
+      .get(`/${api_version}/status/token`)
+      .set('Authorization', `Bearer Some_token`);
 
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(401);
     expect(res.body).toHaveProperty('message');
-    expect(res.body.message).toBe('Token: item does not exist');
+    expect(res.body.message).toBe('Please authenticate');
   });
 
+  test("Refresh token to get new access token", async () => {
+    const res_token = await request(app).post(`/${api_version}/auth/refresh/token`).send({
+      refresh_token: result_refresh_token
+    });
+    expect(res_token.statusCode).toBe(200);
+
+    expect(res_token.body).toHaveProperty('access_token');
+    expect(res_token.body).toHaveProperty('access_token_expires_at');
+    expect(res_token.body).toHaveProperty('refresh_token');
+    expect(res_token.body).toHaveProperty('refresh_token_expires_at');
+  });
+
+  test("Refresh token to get new refresh token", async () => {
+    const res_token = await request(app).post(`/${api_version}/auth/refresh/tokens`).send({
+      refresh_token: result_refresh_token
+    });
+    expect(res_token.statusCode).toBe(200);
+
+    expect(res_token.body).toHaveProperty('access_token');
+    expect(res_token.body).toHaveProperty('access_token_expires_at');
+    expect(res_token.body).toHaveProperty('refresh_token');
+    expect(res_token.body).toHaveProperty('refresh_token_expires_at');
+  });
+
+  test("Expired Refresh token to get new access token", async () => {
+    const res_token = await request(app).post(`/${api_version}/auth/refresh/token`).send({
+      refresh_token: 'some_expired_token'
+    });
+    expect(res_token.statusCode).toBe(500);
+
+  });
+
+  test("Expired Refresh token to get new refresh token", async () => {
+    const res_token = await request(app).post(`/${api_version}/auth/refresh/tokens`).send({
+      refresh_token: 'some_expired_token'
+    });
+    expect(res_token.statusCode).toBe(500);
+
+  });
+
+
 	test("Sign out", async () => {
-    const res = await request(app).post(`/${api_version}/signout`);
+    const res = await request(app)
+      .post(`/${api_version}/signout`)
+      .set('Authorization', `Bearer ${result_access_token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('message');
@@ -208,11 +251,23 @@ describe("Authentication", () => {
   });
 
 	test("Get access token status after sign out", async () => {
-    const res = await request(app).get(`/${api_version}/token/status`);
+    const res = await request(app)
+      .get(`/${api_version}/status/token`)
+      .set('Authorization', `Bearer ${result_access_token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('status');
     expect(res.body.status).toBe('expired');
+  });
+
+  test("Revoke tokens", async () => {
+    const res = await request(app)
+      .post(`/${api_version}/revoke/token/${user_id}`)
+      .set('Authorization', `Bearer ${result_access_token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('success');
   });
 
 });
