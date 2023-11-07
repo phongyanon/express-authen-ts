@@ -15,6 +15,7 @@ import {
 	IStatusToken,
 	IAuthRefreshToken,
 	IAuthRefreshTokenResp,
+	IAuthAccessTokenResp,
 	IVerifyToken
 } from './authen.type';
 import { IResponse, ISuccessResponse } from "../utils/common.type";
@@ -33,6 +34,8 @@ import {
 import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Request } from "tsoa";
 
 dotenv.config();
+const access_token_age: number = 60*24; // 1 day
+const refresh_token_age: number = 60*24*7; // 7 days
 
 @Route("v1")
 export class Controller {
@@ -148,11 +151,11 @@ export class Controller {
 						
 						let add_token = await this.tokenQuery.addToken({
 							user_id: check_user.id,
-							refresh_token: hashPassword(result_access.result as string, salt), 
-							refresh_token_expires_at: addMinutes(date, 60*24), 
+							refresh_token: hashPassword(result_refresh.result as string, salt), 
+							refresh_token_expires_at: addMinutes(date, refresh_token_age), 
 						
-							access_token: hashPassword(result_refresh.result as string, salt),
-							access_token_expires_at: addMinutes(date, 60*24*7), 
+							access_token: hashPassword(result_access.result as string, salt),
+							access_token_expires_at: addMinutes(date, access_token_age), 
 							description: ctx.hasOwnProperty('info') ? ctx.info : ''
 						});
 
@@ -180,7 +183,6 @@ export class Controller {
   })
 	signOut(@Request() req: Req): Promise<IResponse | ISuccessResponse>{
 		return new Promise( async resolve => {
-			// delete all token by user_id.
 			// client (frontend) should delete tokens in localstorage or cookies.
 			let rawToken: string = req.body.rawToken;
 			let user_tokens = await this.tokenQuery.getTokenByUserId(req.body.token.uid);
@@ -188,7 +190,7 @@ export class Controller {
 			else {
 				user_tokens.forEach( async (obj: IToken) => {
 					if (comparePassword(rawToken, obj.access_token as string)) {
-						let del_token = await this.tokenQuery.deleteTokenByUserId(obj.id);
+						let del_token = await this.tokenQuery.deleteToken(obj.id);
 						if (del_token.message === 'Successfully delete'){
 							resolve({message: 'signout'});
 						}
@@ -228,22 +230,25 @@ export class Controller {
 
 	@Post("/auth/refresh/token")
   @SuccessResponse("200", "Success")
-	@Example<IAuthRefreshTokenResp>({
-		"refresh_token": "current_refresh_token",
-		"refresh_token_expires_at": "1660926192000",
+	@Example<IAuthAccessTokenResp>({
 		"access_token": "new_access_token",
-		"access_token_expires_at": "1660926492000"
   })
-	authRefreshToken(@Path() body: IAuthRefreshToken): Promise<IResponse | IAuthRefreshTokenResp>{
+	authRefreshToken(@Body() body: IAuthRefreshToken): Promise<IResponse | IAuthAccessTokenResp>{
 		return new Promise( async resolve => {
     	let verify_refresh: IVerifyToken = await verifyRefreshToken(body.refresh_token as string);
 			if (verify_refresh.success === true){
 				let refresh_payload: IRefreshTokenPayload = verify_refresh.result as IRefreshTokenPayload
 
+				let user_token = await this.tokenQuery.getTokenByUserIdAndRefreshToken(refresh_payload.uid, body.refresh_token);
+				if (user_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+
 				let access_payload: IAccessTokenPayload = { uid: refresh_payload.uid, username: refresh_payload.username }
 				let result_access: ITokenMethodResponse = await genAccessToken(access_payload);
 
-				// TODO: coding from here
+				if (result_access.success === true) {
+					resolve({access_token: result_access.result as string})
+				}
+
 				resolve({error: true, message: 'Authen: Invalid request'}) // delete this
 
 			} else {
@@ -252,7 +257,59 @@ export class Controller {
 		});
 	}
 
-	@Post("/revoke/token")
+	@Post("/auth/refresh/tokens")
+  @SuccessResponse("200", "Success")
+	@Example<ISignInResponse>({
+		"access_token": "new_access_token",
+		"refresh_token": "new_refresh_token",
+  })
+	authBothTokens(@Body() body: IAuthRefreshToken): Promise<IResponse | ISignInResponse>{
+		return new Promise( async resolve => {
+    	let verify_refresh: IVerifyToken = await verifyRefreshToken(body.refresh_token as string);
+			if (verify_refresh.success === true){
+				let refresh_payload: IRefreshTokenPayload = verify_refresh.result as IRefreshTokenPayload
+
+				let result_refresh: ITokenMethodResponse = await genRefreshToken({
+					uid: refresh_payload.uid, username: refresh_payload.username
+				});
+				let result_access: ITokenMethodResponse = await genAccessToken({
+					uid: refresh_payload.uid, username: refresh_payload.username
+				});
+
+				if ((result_access.success === true) && (result_refresh.success === true)) {
+					// get Token by user_id and refresh_token
+					let user_token = await this.tokenQuery.getTokenByUserIdAndRefreshToken(refresh_payload.uid, body.refresh_token);
+					if (user_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+					
+					let date = new Date();
+					let salt: string = genSalt(5);
+
+					let updated_token = await this.tokenQuery.updateToken({
+						id: user_token.id,
+						refresh_token: hashPassword(result_refresh.result as string, salt), 
+						refresh_token_expires_at: addMinutes(date, refresh_token_age),
+
+						access_token: hashPassword(result_access.result as string, salt), 
+						access_token_expires_at: addMinutes(date, access_token_age), 
+					})
+
+					if (updated_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+
+					resolve({
+						access_token: result_access.result,
+						refresh_token: result_refresh.result
+					})
+				}
+
+				resolve({error: true, message: 'Authen: Invalid request'})
+
+			} else {
+				resolve({error: true, message: 'Authen: Invalid request'})
+			}
+		});
+	}
+
+	@Post("/revoke/token/{user_id}")
   @SuccessResponse("200", "Success")
 	@Example<ISuccessResponse>({
 		"message": "success"

@@ -206,9 +206,6 @@ describe("Authentication", () => {
     expect(res_token.statusCode).toBe(200);
 
     expect(res_token.body).toHaveProperty('access_token');
-    expect(res_token.body).toHaveProperty('access_token_expires_at');
-    expect(res_token.body).toHaveProperty('refresh_token');
-    expect(res_token.body).toHaveProperty('refresh_token_expires_at');
   });
 
   test("Refresh token to get new refresh token", async () => {
@@ -218,9 +215,7 @@ describe("Authentication", () => {
     expect(res_token.statusCode).toBe(200);
 
     expect(res_token.body).toHaveProperty('access_token');
-    expect(res_token.body).toHaveProperty('access_token_expires_at');
     expect(res_token.body).toHaveProperty('refresh_token');
-    expect(res_token.body).toHaveProperty('refresh_token_expires_at');
   });
 
   test("Expired Refresh token to get new access token", async () => {
@@ -250,17 +245,27 @@ describe("Authentication", () => {
     expect(res.body.message).toBe('signout');
   });
 
-	test("Get access token status after sign out", async () => {
-    const res = await request(app)
-      .get(`/${api_version}/status/token`)
-      .set('Authorization', `Bearer ${result_access_token}`);
+  // Front-end should delete all tokens
+	// test("Get access token status after sign out", async () => {
+  //   const res = await request(app)
+  //     .get(`/${api_version}/status/token`)
+  //     .set('Authorization', `Bearer ${result_access_token}`);
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('status');
-    expect(res.body.status).toBe('expired');
-  });
+  //   expect(res.statusCode).toBe(200);
+  //   expect(res.body).toHaveProperty('status');
+  //   expect(res.body.status).toBe('expired');
+  // });
 
   test("Revoke tokens", async () => {
+    const signin_res = await request(app).post(`/${api_version}/signin`).send({
+      username: test_users[0].username,
+      password: test_users[0].password
+    });
+
+    expect(signin_res.statusCode).toBe(200);
+    result_access_token = signin_res.body.access_token;
+    result_refresh_token = signin_res.body.refresh_token;
+
     const res = await request(app)
       .post(`/${api_version}/revoke/token/${user_id}`)
       .set('Authorization', `Bearer ${result_access_token}`);

@@ -123,6 +123,30 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IAuthAccessTokenResp": {
+				"properties": {
+					"access_token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"access_token"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IAuthRefreshToken": {
+				"properties": {
+					"refresh_token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"refresh_token"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IToken": {
 				"properties": {
 					"user_id": {
@@ -686,6 +710,135 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/v1/auth/refresh/token": {
+			"post": {
+				"operationId": "AuthRefreshToken",
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IAuthAccessTokenResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"access_token": "new_access_token"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IAuthRefreshToken"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/auth/refresh/tokens": {
+			"post": {
+				"operationId": "AuthBothTokens",
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISignInResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"access_token": "new_access_token",
+											"refresh_token": "new_refresh_token"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IAuthRefreshToken"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/revoke/token/{user_id}": {
+			"post": {
+				"operationId": "RevokeToken",
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/tokens": {

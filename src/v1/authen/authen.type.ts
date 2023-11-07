@@ -54,6 +54,10 @@ export interface IAuthRefreshTokenResp {
     refresh_token_expires_at: string
 }
 
+export interface IAuthAccessTokenResp {
+    access_token: string
+}
+
 export interface IVerifyToken {
     success: boolean
     result: JwtPayload | null

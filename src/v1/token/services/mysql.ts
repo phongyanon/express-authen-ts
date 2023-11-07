@@ -1,6 +1,7 @@
 import { Pool, RowDataPacket, ResultSetHeader } from 'mysql2';
 import { connectMysql } from "../../utils/dbConnection";
 import { ITokenInsert, ITokenUpdate } from '../token.type';
+import { comparePassword } from '../../utils/helper';
 
 export class Query {
 	con: Pool
@@ -60,6 +61,31 @@ export class Query {
 	
 								return row;
 							}));
+						}
+					}
+			});
+		});
+	}
+
+	getTokenByUserIdAndRefreshToken(user_id: string, refresh_token: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM Token WHERE user_id = ?;', [user_id], 
+				(err, rows) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (rows.length === 0) resolve({error: true, message: 'Token: item does not exist'});
+						else {
+
+							rows.map( row => {
+								if (comparePassword(refresh_token, row.refresh_token) === true){
+									row.user_id = row.user_id.toString(); 
+									row.refresh_token_expires_at = row.refresh_token_expires_at.valueOf();
+									row.access_token_expires_at = row.access_token_expires_at.valueOf();
+		
+									resolve(row);
+								}
+							});
+
 						}
 					}
 			});

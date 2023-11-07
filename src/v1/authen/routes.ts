@@ -7,6 +7,7 @@ import {
   ISignOutResponse, 
   IStatusToken, 
   IAuthRefreshToken, 
+  IAuthAccessTokenResp,
   IAuthRefreshTokenResp } from "./authen.type";
 import { auth } from "../middleware/authen";
 import { Controller } from "./controllers";
@@ -56,9 +57,18 @@ router.get("/status/token", auth, async (req: Request, res: Response) => {
   else res.status(200).send(result);
 });
 
-router.post("/auth/refresh/token", auth, async (req: Request, res: Response) => {
+router.post("/auth/refresh/token", async (req: Request, res: Response) => {
   const refreshToken: IAuthRefreshToken = req.body;
-  let result: IResponse | IAuthRefreshTokenResp = await authen.authRefreshToken(refreshToken);
+  let result: IResponse | IAuthAccessTokenResp = await authen.authRefreshToken(refreshToken);
+  if (result.hasOwnProperty('error')){
+    res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.post("/auth/refresh/tokens", async (req: Request, res: Response) => {
+  const refreshToken: IAuthRefreshToken = req.body;
+  let result: IResponse | IAuthRefreshTokenResp = await authen.authBothTokens(refreshToken);
   if (result.hasOwnProperty('error')){
     res.status(500).send(result);
   }
