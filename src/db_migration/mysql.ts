@@ -53,7 +53,7 @@ const createTableProfile = () => {
         address_EN VARCHAR(255),
         address_TH VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
         zip_code INT(255),
-        phone INT(255),
+        phone VARCHAR(255),
         image_profile VARCHAR(255),
         create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         update_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -25,3 +25,13 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
   	res.status(401).send({message: 'Please authenticate'});
  	}
 };
+
+export const checkRole = (roles: string[]) => async (req: Request, res: Response, next: NextFunction) => {
+	let { uid, username } = req.body.token;
+  
+	//retrieve employee info from DB
+	// const employee = await Employee.findOne({ name });
+	!roles.includes('role')
+	  ? res.status(401).json("Unauthirize to access this route")
+	  : next();
+  };

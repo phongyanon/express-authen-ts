@@ -8,6 +8,10 @@ import { router as verificationRoutes } from "./src/v1/verification/routes";
 import { router as tokenRoutes } from "./src/v1/token/routes";
 import { router as authenRoutes } from "./src/v1/authen/routes";
 
+import { router as roleRoutes } from "./src/v1/role/routes";
+import { router as uesrRoleRoutes } from "./src/v1/userRole/routes";
+import { router as profileRoutes } from "./src/v1/profile/routes";
+
 const app: Application = express();
 const corsOptions: cors.CorsOptions = {
   origin: '*',
@@ -30,6 +34,10 @@ app.use("/v1", userRoutes);
 app.use("/v1", verificationRoutes);
 app.use("/v1", tokenRoutes);
 app.use("/v1", authenRoutes);
+
+app.use("/v1", roleRoutes);
+app.use("/v1", uesrRoleRoutes);
+app.use("/v1", profileRoutes);
 
 app.use(express.static("public"));
 app.use(
