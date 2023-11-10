@@ -2,11 +2,12 @@ import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
 import { ISettingInsert, ISettingUpdate, ISetting } from "./setting.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
+import { auth } from "../middleware/authen";
 
 const router = Router();
 let setting = new Controller();
 
-router.get("/settings", async (req: Request, res: Response) => {
+router.get("/settings", auth, async (req: Request, res: Response) => {
   let result: IResponse | ISetting[] = await setting.getSettings();
   if (result.hasOwnProperty('error')) res.status(500).send(result);
   else res.status(200).send(result);

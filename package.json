@@ -5,11 +5,11 @@
   "main": "server.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "node dist/server.js",
+    "start": "node NODE_ENV=production dist/server.js",
     "dev:server": "nodemon --watch './**/*.ts' --exec 'ts-node' server.ts",
     "dev": "NODE_ENV=development ts-node server.ts",
     "test": "NODE_ENV=test jest --runInBand",
-    "test:api": "NODE_ENV=test jest --runInBand src/tests/setting.test.ts",
+    "test:api": "NODE_ENV=test NO_AUTH=1 jest --runInBand src/tests/setting.test.ts",
     "test:authen": "NODE_ENV=test jest --runInBand src/tests/authen.test.ts",
     "migrate:mysql": "NODE_ENV=development ts-node src/db_migration/mysql.ts",
     "migrate:mysql-test": "NODE_ENV=test ts-node src/db_migration/mysql.ts",

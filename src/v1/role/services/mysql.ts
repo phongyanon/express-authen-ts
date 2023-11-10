@@ -35,6 +35,20 @@ export class Query {
 		});
 	}
 
+	getRolesByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT Role.name FROM Role \
+				INNER JOIN UserRole ON UserRole.role_id=Role.id WHERE UserRole.user_id=?;', 
+				[user_id], 
+				(err, rows) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						resolve(rows.map(obj => {return obj.name}));
+					}
+			});
+		});
+	}
+
 	addRole(ctx: IRoleInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO Role ( \

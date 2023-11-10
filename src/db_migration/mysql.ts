@@ -145,6 +145,23 @@ const createTableRole = () => {
   });
 }
 
+const addDefaultTableRole = () => {
+  return new Promise( resolve => {
+    conn.execute(`
+    INSERT INTO 
+      Role(name)
+    VALUES
+      ('SuperAdmin'),
+      ('Admin'),
+      ('User');
+    `, (err, result) => {
+      if (err) throw err;
+      resolve(result);
+    });
+  });
+}
+
+
 const createTablePermission = () => {
   return new Promise( resolve => {
     conn.execute(`
@@ -226,6 +243,7 @@ const migrateDB = async () => {
 
   await createTableRolePermission();
   await createTableAction();
+  await addDefaultTableRole();
 
   conn.destroy();
   console.log(`Migrate ${process.env.NODE_ENV} database done...`);

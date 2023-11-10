@@ -50,6 +50,13 @@ export class Controller {
 		});
 	}
 
+	getRolesByUserId(user_id: string): Promise<IResponse | string[]>{
+		return new Promise( async resolve => {
+			let result = await this.query.getRolesByUserId(user_id);
+			resolve(result);
+		});
+	}
+
 	@Post("role")
   @SuccessResponse("201", "Created")
 	@Example<ISuccessResponse>({

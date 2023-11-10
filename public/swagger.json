@@ -373,6 +373,74 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ISetting": {
+				"properties": {
+					"reset_password_interval": {
+						"type": "number",
+						"format": "double"
+					},
+					"enable_reset_password_interval": {
+						"type": "boolean"
+					},
+					"enable_verify_email": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"reset_password_interval",
+					"enable_reset_password_interval",
+					"enable_verify_email",
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ISettingInsert": {
+				"properties": {
+					"reset_password_interval": {
+						"type": "number",
+						"format": "double"
+					},
+					"enable_reset_password_interval": {
+						"type": "boolean"
+					},
+					"enable_verify_email": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"reset_password_interval",
+					"enable_reset_password_interval",
+					"enable_verify_email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ISettingUpdate": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"reset_password_interval": {
+						"type": "number",
+						"format": "double"
+					},
+					"enable_reset_password_interval": {
+						"type": "boolean"
+					},
+					"enable_verify_email": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IToken": {
 				"properties": {
 					"user_id": {
@@ -1555,6 +1623,219 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/IRoleInsert"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/settings": {
+			"get": {
+				"operationId": "GetSettings",
+				"responses": {
+					"200": {
+						"description": "Get settings",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/ISetting"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"id": "3",
+												"reset_password_interval": 90,
+												"enable_reset_password_interval": false,
+												"enable_verify_email": false
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/setting/{id}": {
+			"get": {
+				"operationId": "GetSetting",
+				"responses": {
+					"200": {
+						"description": "Get setting",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISetting"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "3",
+											"reset_password_interval": 90,
+											"enable_reset_password_interval": true,
+											"enable_verify_email": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSetting",
+				"responses": {
+					"200": {
+						"description": "Updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully update",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ISettingUpdate"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSetting",
+				"responses": {
+					"200": {
+						"description": "Deleted",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully delete",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/setting": {
+			"post": {
+				"operationId": "AddSetting",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully create",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ISettingInsert"
 							}
 						}
 					}

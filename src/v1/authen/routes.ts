@@ -9,7 +9,8 @@ import {
   IAuthRefreshToken, 
   IAuthAccessTokenResp,
   IAuthRefreshTokenResp } from "./authen.type";
-import { auth } from "../middleware/authen";
+import { auth, checkRole } from "../middleware/authen";
+import { Role } from "../utils/role";
 import { Controller } from "./controllers";
 
 const router = Router();
@@ -37,9 +38,7 @@ router.post("/signin", async (req: Request, res: Response) => {
 
 router.post("/signout", auth, async (req: Request, res: Response) => {
   // use access token
-  // const signoutUser: IUserSignIn = req.body;
   let result: IResponse | ISignOutResponse = await authen.signOut(req);
-  // let result: ISignOutResponse = { message: 'signout' };
   if (result.hasOwnProperty('error')){
     if (result.error === 'Invalid username or password') res.status(400).send(result);
     else res.status(500).send(result);
@@ -47,9 +46,8 @@ router.post("/signout", auth, async (req: Request, res: Response) => {
   else res.status(200).send(result);
 });
 
-router.get("/status/token", auth, async (req: Request, res: Response) => {
+router.get("/status/token", auth, checkRole([Role.SuperAdmin]), async (req: Request, res: Response) => {
   let result: IResponse | IStatusToken = await authen.getTokenStatus(req);
-  // let result: IResponse | ISuccessResponse = { message: 'ok' };
   if (result.hasOwnProperty('error')){
     if (result.hasOwnProperty('message')) res.status(404).send(result);
     else res.status(500).send(result);
