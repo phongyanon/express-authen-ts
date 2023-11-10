@@ -11,6 +11,7 @@ import { router as authenRoutes } from "./src/v1/authen/routes";
 import { router as roleRoutes } from "./src/v1/role/routes";
 import { router as uesrRoleRoutes } from "./src/v1/userRole/routes";
 import { router as profileRoutes } from "./src/v1/profile/routes";
+import { router as settingRoutes } from "./src/v1/setting/routes";
 
 const app: Application = express();
 const corsOptions: cors.CorsOptions = {
@@ -38,6 +39,7 @@ app.use("/v1", authenRoutes);
 app.use("/v1", roleRoutes);
 app.use("/v1", uesrRoleRoutes);
 app.use("/v1", profileRoutes);
+app.use("/v1", settingRoutes);
 
 app.use(express.static("public"));
 app.use(
