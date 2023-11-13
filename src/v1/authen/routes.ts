@@ -46,7 +46,7 @@ router.post("/signout", auth, async (req: Request, res: Response) => {
   else res.status(200).send(result);
 });
 
-router.get("/status/token", auth, checkRole([Role.SuperAdmin]), async (req: Request, res: Response) => {
+router.get("/status/token", auth, async (req: Request, res: Response) => {
   let result: IResponse | IStatusToken = await authen.getTokenStatus(req);
   if (result.hasOwnProperty('error')){
     if (result.hasOwnProperty('message')) res.status(404).send(result);
@@ -54,6 +54,19 @@ router.get("/status/token", auth, checkRole([Role.SuperAdmin]), async (req: Requ
   }
   else res.status(200).send(result);
 });
+
+router.get("/test/role/admin", auth, checkRole([Role.Admin]), async (req: Request, res: Response) => {
+  res.status(200).send({message: 'ok'});
+});
+
+router.get("/test/role/user", auth, checkRole([Role.User]), async (req: Request, res: Response) => {
+  res.status(200).send({message: 'ok'});
+});
+
+router.get("/test/roles/user/admin", auth, checkRole([Role.User, Role.Admin]), async (req: Request, res: Response) => {
+  res.status(200).send({message: 'ok'});
+});
+
 
 router.post("/auth/refresh/token", async (req: Request, res: Response) => {
   const refreshToken: IAuthRefreshToken = req.body;
@@ -73,7 +86,7 @@ router.post("/auth/refresh/tokens", async (req: Request, res: Response) => {
   else res.status(200).send(result);
 });
 
-router.post("/revoke/token/:id", auth, async (req: Request, res: Response) => {
+router.post("/revoke/token/:id", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
   const id: string = (req.params.id).toString();
   let result: IResponse | ISignOutResponse = await authen.revokeToken(id);
   if (result.hasOwnProperty('error')){

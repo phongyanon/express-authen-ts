@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { Controller as VerificationController } from "../v1/verification/controllers";
 import { Controller as TokenController } from "../v1/token/controllers";
+import { Controller as ProfileController } from "../v1/profile/controllers";
+import { Controller as UserRoleController } from "../v1/userRole/controllers";
 import { Controller as UserController } from "../v1/user/controllers";
 import { 
   hashPassword, 
@@ -17,6 +19,8 @@ import {
 
 let tokenController = new TokenController();
 let verificationController = new VerificationController();
+let profileController = new ProfileController();
+let userRoleController = new UserRoleController();
 let userController = new UserController();
 
 dotenv.config();
@@ -104,6 +108,8 @@ describe("Authentication", () => {
     try {
       await tokenController.resetToken();
       await verificationController.resetVerification();
+      await profileController.resetProfile();
+      await userRoleController.resetUserRole();
       await userController.resetUser();
     } catch (err) {
       // do nothing
@@ -197,6 +203,36 @@ describe("Authentication", () => {
     expect(res.statusCode).toBe(401);
     expect(res.body).toHaveProperty('message');
     expect(res.body.message).toBe('Please authenticate');
+  });
+
+  test("Role User access", async () => {
+    const res = await request(app)
+      .get(`/${api_version}/test/role/user`)
+      .set('Authorization', `Bearer ${result_access_token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('ok');
+  });
+
+  test("Role User access both", async () => {
+    const res = await request(app)
+      .get(`/${api_version}/test/roles/user/admin`)
+      .set('Authorization', `Bearer ${result_access_token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('ok');
+  });
+
+  test("Role Admin access deny", async () => {
+    const res = await request(app)
+      .get(`/${api_version}/test/role/admin`)
+      .set('Authorization', `Bearer ${result_access_token}`);
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Unauthirize to access this route');
   });
 
   test("Refresh token to get new access token", async () => {

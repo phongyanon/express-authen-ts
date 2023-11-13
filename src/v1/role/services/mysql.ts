@@ -35,6 +35,21 @@ export class Query {
 		});
 	}
 
+	getRoleByName(name: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM Role WHERE name = ?;', [name], 
+				(err, row) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'Role: item does not exist'});
+						else {
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
 	getRolesByUserId(user_id: string){
 		return new Promise( resolve => {
 			this.con.execute<RowDataPacket[]>('SELECT Role.name FROM Role \

@@ -3,6 +3,10 @@ import { Query as UserMysqlQuery } from '../user/services/mysql';
 import { Query as UserMongoQuery } from '../user/services/mongo';
 import { Query as TokenMysqlQuery } from '../token/services/mysql';
 import { Query as TokenMongoQuery } from '../token/services/mongo';
+import { Query as RoleMysqlQuery } from '../role/services/mysql';
+import { Query as RoleMongoQuery } from '../role/services/mongo';
+import { Query as UserRoleMysqlQuery } from '../userRole/services/mysql';
+import { Query as UserRoleMongoQuery } from '../userRole/services/mongo';
 import { IUserInsert } from '../user/user.type';
 import { 
 	IUserSignUp, 
@@ -41,22 +45,32 @@ const refresh_token_age: number = 60*24*7; // 7 days
 export class Controller {
 	userQuery: any
 	tokenQuery: any
+	roleQuery: any
+	userRoleQuery: any
   constructor(){
 		let UserQuery;
 		let TokenQuery;
+		let RoleQuery;
+		let UserRoleQuery;
 		switch(process.env.DB_TYPE){
 				case('mysql'):
 					UserQuery = new UserMysqlQuery();
 					TokenQuery = new TokenMysqlQuery();
+					RoleQuery = new RoleMysqlQuery();
+					UserRoleQuery = new UserRoleMysqlQuery();
 					break;
 				case('mongo'):
 					UserQuery = new UserMongoQuery();
 					TokenQuery = new TokenMongoQuery();
+					RoleQuery = new RoleMongoQuery();
+					UserRoleQuery = new UserRoleMongoQuery();
 					break;
 		}
 		
 		this.userQuery = UserQuery;
 		this.tokenQuery = TokenQuery;
+		this.roleQuery = RoleQuery;
+		this.userRoleQuery = UserRoleQuery;
 	}
 
 	@Post("signup")
@@ -87,7 +101,15 @@ export class Controller {
 
 					let result = await this.userQuery.addUser(newUser);
 					if (result.hasOwnProperty('error')) resolve(result);
-					else resolve({message: 'Successfully signup', id: result.id});
+					else {
+						let role_user = await this.roleQuery.getRoleByName('User');
+						if (role_user.hasOwnProperty('error')) resolve(role_user);
+
+						let assign_role = await this.userRoleQuery.addUserRole({user_id: result.id, role_id: role_user.id});
+						if (assign_role.hasOwnProperty('error')) resolve(assign_role);
+
+						resolve({message: 'Successfully signup', id: result.id});
+					}
 					
 				} else resolve({error: 'Duplicated username or email', message: 'Authen: Invalid request'});
 

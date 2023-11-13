@@ -3,6 +3,8 @@ import app from "../../app";
 import { Controller as VerificationController } from "../v1/verification/controllers";
 import { Controller as TokenController } from "../v1/token/controllers";
 import { Controller as UserController } from "../v1/user/controllers";
+import { Controller as ProfileController } from "../v1/profile/controllers";
+import { Controller as UserRoleController } from "../v1/userRole/controllers";
 import { IUserInsert } from "./user.test";
 import dotenv from 'dotenv';
 
@@ -11,6 +13,8 @@ const api_version = process.env.API_VERSION;
 
 let tokenController = new TokenController();
 let verificationController = new VerificationController();
+let profileController = new ProfileController();
+let userRoleController = new UserRoleController();
 let userController = new UserController();
 
 export interface IVerificationInsert {
@@ -108,6 +112,8 @@ describe("CRUD Verification", () => {
     try {
       await tokenController.resetToken();
       await verificationController.resetVerification();
+      await profileController.resetProfile();
+      await userRoleController.resetUserRole();
       await userController.resetUser();
     } catch (err) {
       // do nothing
