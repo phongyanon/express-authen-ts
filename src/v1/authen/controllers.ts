@@ -7,6 +7,8 @@ import { Query as RoleMysqlQuery } from '../role/services/mysql';
 import { Query as RoleMongoQuery } from '../role/services/mongo';
 import { Query as UserRoleMysqlQuery } from '../userRole/services/mysql';
 import { Query as UserRoleMongoQuery } from '../userRole/services/mongo';
+import { Query as VerificationMysqlQuery } from '../verification/services/mysql';
+import { Query as VerificationMongoQuery } from '../verification/services/mongo';
 import { IUserInsert } from '../user/user.type';
 import { 
 	IUserSignUp, 
@@ -47,23 +49,27 @@ export class Controller {
 	tokenQuery: any
 	roleQuery: any
 	userRoleQuery: any
+	verificationQuery: any
   constructor(){
 		let UserQuery;
 		let TokenQuery;
 		let RoleQuery;
 		let UserRoleQuery;
+		let verificationQuery;
 		switch(process.env.DB_TYPE){
 				case('mysql'):
 					UserQuery = new UserMysqlQuery();
 					TokenQuery = new TokenMysqlQuery();
 					RoleQuery = new RoleMysqlQuery();
 					UserRoleQuery = new UserRoleMysqlQuery();
+					verificationQuery = new VerificationMysqlQuery();
 					break;
 				case('mongo'):
 					UserQuery = new UserMongoQuery();
 					TokenQuery = new TokenMongoQuery();
 					RoleQuery = new RoleMongoQuery();
 					UserRoleQuery = new UserRoleMongoQuery();
+					verificationQuery = new VerificationMongoQuery();
 					break;
 		}
 		
@@ -71,6 +77,7 @@ export class Controller {
 		this.tokenQuery = TokenQuery;
 		this.roleQuery = RoleQuery;
 		this.userRoleQuery = UserRoleQuery;
+		this.verificationQuery = verificationQuery;
 	}
 
 	@Post("signup")
@@ -107,6 +114,21 @@ export class Controller {
 
 						let assign_role = await this.userRoleQuery.addUserRole({user_id: result.id, role_id: role_user.id});
 						if (assign_role.hasOwnProperty('error')) resolve(assign_role);
+
+						const current = Date.now();
+						let user_verify = await this.verificationQuery.addVerification({
+							user_id: result.id,
+							reset_password_token: null,
+							reset_password_token_expires_at: current,
+							verify_email_token: null,
+							verify_email_token_expires_at: current,
+							email_verified: false,
+							enable_opt: false,
+							otp_secret: null,
+							otp_verified: false,
+							token_salt: ''
+						})
+						if (user_verify.hasOwnProperty('error')) resolve(user_verify);
 
 						resolve({message: 'Successfully signup', id: result.id});
 					}

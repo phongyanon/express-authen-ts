@@ -41,6 +41,23 @@ export class Query {
 		});
 	}
 
+	getProfileByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM Profile WHERE user_id = ?;', [user_id], 
+				(err, row) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'Profile: item does not exist'});
+						else {
+							row[0].user_id = row[0].user_id.toString();
+							row[0].date_of_birth = row[0].date_of_birth.valueOf();
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
 	addProfile(ctx: IProfileInsert){
 		return new Promise( resolve => {
 			let dateOfBirth = new Date(ctx.date_of_birth);

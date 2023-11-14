@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
 import { IVerificationInsert, IVerificationUpdate, IVerification } from "./verification.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
-import { auth, checkRole } from "../middleware/authen";
+import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role } from "../utils/role";
 
 const router = Router();
@@ -14,9 +14,20 @@ router.get("/verifications", auth, checkRole([Role.SuperAdmin, Role.Admin]), asy
   else res.status(200).send(result);
 });
 
-router.get("/verification/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), async (req: Request, res: Response) => {
+router.get("/verification/:id", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
   const id: string = (req.params.id).toString();
   let result: IResponse | IVerification = await verification.getVerification(id);
+  
+  if (result.hasOwnProperty('error')) {
+    if (result.hasOwnProperty('message')) res.status(404).send(result);
+    else res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.get("/user/verification/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
+  const user_id: string = (req.params.user_id).toString();
+  let result: IResponse | IVerification = await verification.getVerificationByUserId(user_id);
   
   if (result.hasOwnProperty('error')) {
     if (result.hasOwnProperty('message')) res.status(404).send(result);

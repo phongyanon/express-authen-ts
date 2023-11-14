@@ -329,6 +329,57 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IProfileUpdateByUser": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"first_name_EN": {
+						"type": "string"
+					},
+					"last_name_EN": {
+						"type": "string"
+					},
+					"first_name_TH": {
+						"type": "string",
+						"nullable": true
+					},
+					"last_name_TH": {
+						"type": "string",
+						"nullable": true
+					},
+					"gender": {
+						"type": "string"
+					},
+					"date_of_birth": {
+						"type": "number",
+						"format": "double"
+					},
+					"address_EN": {
+						"type": "string"
+					},
+					"address_TH": {
+						"type": "string",
+						"nullable": true
+					},
+					"zip_code": {
+						"type": "number",
+						"format": "double"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"image_profile": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"user_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IRole": {
 				"properties": {
 					"name": {
@@ -1376,6 +1427,144 @@
 				]
 			}
 		},
+		"/v1/user/profile/{user_id}": {
+			"get": {
+				"operationId": "GetProfileByUserId",
+				"responses": {
+					"200": {
+						"description": "Get Profile by user_id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IProfile"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "5",
+											"user_id": "test",
+											"first_name_EN": "John",
+											"last_name_EN": "Doe",
+											"first_name_TH": "จอน",
+											"last_name_TH": "โด",
+											"gender": "male",
+											"date_of_birth": 1699516723,
+											"address_EN": "test address",
+											"address_TH": "ทดสอบ",
+											"zip_code": 27000,
+											"phone": "+66939999999",
+											"image_profile": "test_url"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "AddProfileByUserId",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully create",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IProfileInsert"
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"operationId": "UpdateProfileByUserId",
+				"responses": {
+					"200": {
+						"description": "Updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Successfully update",
+											"id": "123"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IProfileUpdateByUser"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/profile": {
 			"post": {
 				"operationId": "AddProfile",
@@ -1847,7 +2036,7 @@
 				"operationId": "GetTokens",
 				"responses": {
 					"200": {
-						"description": "Get tsers",
+						"description": "Get tokens",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -2009,6 +2198,56 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/user/tokens/{user_id}": {
+			"get": {
+				"operationId": "GetTokenByUserId",
+				"responses": {
+					"200": {
+						"description": "Get tokens",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IToken"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"id": "5",
+												"user_id": "test",
+												"access_token": "access_token",
+												"access_token_expires_at": 1660926192000,
+												"refresh_token": "refresh_token",
+												"refresh_token_expires_at": 1660926192000,
+												"description": "secret"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -2670,6 +2909,58 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/user/verification/{user_id}": {
+			"get": {
+				"operationId": "GetVerificationByUserId",
+				"responses": {
+					"200": {
+						"description": "Get verification by user_id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IVerification"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "5",
+											"user_id": "test",
+											"reset_password_token": "reset_password_token",
+											"reset_password_token_expires_at": 1660926192826,
+											"verify_email_token": "email_token",
+											"verify_email_token_expires_at": 1660926192826,
+											"email_verified": false,
+											"enable_opt": false,
+											"otp_secret": "secret",
+											"otp_verified": false,
+											"token_salt": "salt"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
 						"required": true,
 						"schema": {
 							"type": "string"

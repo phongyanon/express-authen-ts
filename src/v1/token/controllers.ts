@@ -25,7 +25,7 @@ export class Controller {
 	}
 
 	@Get("tokens")
-	@SuccessResponse("200", "Get tsers")
+	@SuccessResponse("200", "Get tokens")
 	@Example<IToken[]>([{
 		id: '5',
 		user_id: 'test',
@@ -56,6 +56,24 @@ export class Controller {
 	getToken(@Path() id: string): Promise<IResponse | IToken>{
 		return new Promise( async resolve => {
 			let result = await this.query.getToken(id);
+			resolve(result);
+		});
+	}
+
+	@Get("/user/tokens/{user_id}")
+	@SuccessResponse("200", "Get tokens")
+	@Example<IToken[]>([{
+		id: '5',
+		user_id: 'test',
+		access_token: "access_token",
+		access_token_expires_at: 1660926192000,
+		refresh_token: "refresh_token", 
+		refresh_token_expires_at: 1660926192000,
+		description: "secret"
+  }])
+	getTokenByUserId(@Path() user_id: string): Promise<IResponse | IToken>{
+		return new Promise( async resolve => {
+			let result = await this.query.getTokenByUserId(user_id);
 			resolve(result);
 		});
 	}

@@ -68,6 +68,28 @@ export class Controller {
 		});
 	}
 
+	@Get("user/verification/{user_id}")
+	@SuccessResponse("200", "Get verification by user_id")
+	@Example<IVerification>({
+		id: '5',
+		user_id: 'test',
+		reset_password_token: "reset_password_token",
+		reset_password_token_expires_at: 1660926192826,
+		verify_email_token: "email_token", 
+		verify_email_token_expires_at: 1660926192826,
+		email_verified: false, 
+		enable_opt: false,
+		otp_secret: "secret",
+		otp_verified: false,
+		token_salt: "salt",
+  })
+	getVerificationByUserId(@Path() user_id: string): Promise<IResponse | IVerification>{
+		return new Promise( async resolve => {
+			let result = await this.query.getVerificationByUserId(user_id);
+			resolve(result);
+		});
+	}
+
 	@Post("verification")
   @SuccessResponse("201", "Created")
 	@Example<ISuccessResponse>({

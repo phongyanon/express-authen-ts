@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
 import { IUserInsert, IUserUpdate, IUser } from "./user.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
-import { auth, checkRole } from "../middleware/authen";
+import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role, isSingleRole } from "../utils/role";
 
 const router = Router();
@@ -14,9 +14,9 @@ router.get("/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req:
   else res.status(200).send(result);
 });
 
-router.get("/user/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), async (req: Request, res: Response) => {
-  const id: string = (req.params.id).toString();
-  let result: IResponse | IUser = await user.getUser(id);
+router.get("/user/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
+  const user_id: string = (req.params.user_id).toString();
+  let result: IResponse | IUser = await user.getUser(user_id);
   
   if (result.hasOwnProperty('error')) {
     if (result.hasOwnProperty('message')) res.status(404).send(result);

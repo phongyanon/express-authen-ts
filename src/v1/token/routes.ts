@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
 import { ITokenInsert, ITokenUpdate, IToken } from "./token.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
-import { auth, checkRole } from "../middleware/authen";
+import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role, isSingleRole } from "../utils/role";
 
 const router = Router();
@@ -11,6 +11,17 @@ let token = new Controller();
 router.get("/tokens", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
   let result: IResponse | IToken[] = await token.getTokens();
   if (result.hasOwnProperty('error')) res.status(500).send(result);
+  else res.status(200).send(result);
+});
+
+router.get("/user/tokens/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin]), checkRoleUserAccess, async (req: Request, res: Response) => {
+  const user_id: string = (req.params.user_id).toString();
+  let result: IResponse | IToken = await token.getTokenByUserId(user_id);
+  
+  if (result.hasOwnProperty('error')) {
+    if (result.hasOwnProperty('message')) res.status(404).send(result);
+    else res.status(500).send(result);
+  }
   else res.status(200).send(result);
 });
 

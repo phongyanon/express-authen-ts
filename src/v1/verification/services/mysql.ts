@@ -53,6 +53,29 @@ export class Query {
 		});
 	}
 
+	getVerificationByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM Verification WHERE user_id = ?;', [user_id], 
+				(err, row) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'Verification: item does not exist'});
+						else {
+							row[0].email_verified = row[0].email_verified === 0 ? false: true;
+							row[0].enable_opt = row[0].enable_opt === 0 ? false: true;
+							row[0].otp_verified = row[0].otp_verified === 0 ? false: true;
+							row[0].user_id = row[0].user_id.toString();
+
+							row[0].reset_password_token_expires_at = row[0].reset_password_token_expires_at.valueOf();
+							row[0].verify_email_token_expires_at = row[0].verify_email_token_expires_at.valueOf();
+
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
 	addVerification(ctx: IVerificationInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO Verification ( \

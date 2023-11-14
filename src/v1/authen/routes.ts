@@ -9,7 +9,7 @@ import {
   IAuthRefreshToken, 
   IAuthAccessTokenResp,
   IAuthRefreshTokenResp } from "./authen.type";
-import { auth, checkRole } from "../middleware/authen";
+import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role } from "../utils/role";
 import { Controller } from "./controllers";
 
@@ -86,9 +86,9 @@ router.post("/auth/refresh/tokens", async (req: Request, res: Response) => {
   else res.status(200).send(result);
 });
 
-router.post("/revoke/token/:id", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
-  const id: string = (req.params.id).toString();
-  let result: IResponse | ISignOutResponse = await authen.revokeToken(id);
+router.post("/revoke/token/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
+  const user_id: string = (req.params.user_id).toString();
+  let result: IResponse | ISignOutResponse = await authen.revokeToken(user_id);
   if (result.hasOwnProperty('error')){
     res.status(500).send(result);
   }
