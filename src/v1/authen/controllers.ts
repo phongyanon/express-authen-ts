@@ -9,7 +9,7 @@ import { Query as UserRoleMysqlQuery } from '../userRole/services/mysql';
 import { Query as UserRoleMongoQuery } from '../userRole/services/mongo';
 import { Query as VerificationMysqlQuery } from '../verification/services/mysql';
 import { Query as VerificationMongoQuery } from '../verification/services/mongo';
-import { IUserInsert } from '../user/user.type';
+import { IUserInsert, IUserUpdate } from '../user/user.type';
 import { 
 	IUserSignUp, 
 	IUserSignIn, 
@@ -22,7 +22,9 @@ import {
 	IAuthRefreshToken,
 	IAuthRefreshTokenResp,
 	IAuthAccessTokenResp,
-	IVerifyToken
+	IVerifyToken,
+	IUserChangePassword,
+	IStatusChangePassword
 } from './authen.type';
 import { IResponse, ISuccessResponse } from "../utils/common.type";
 import { IToken } from '../token/token.type';
@@ -242,6 +244,45 @@ export class Controller {
 						resolve(del_token);
 					}
 				});
+			}
+		});
+	}
+
+	@Post("/password/change")
+	@SuccessResponse("200", "Change password")
+	@Example<IStatusChangePassword>({
+		message: 'success'
+  })
+	changePassword(@Body() ctx: IUserChangePassword): Promise<IResponse | IStatusChangePassword>{
+		return new Promise( async resolve => {
+			let user = await this.userQuery.getUser(ctx.user_id);
+			if (user.hasOwnProperty('error')) {
+				resolve(user);
+
+			} else {
+				let hash: string = user.password;
+				let isPasswordMatch: boolean = comparePassword(ctx.password, hash);
+				
+				if (isPasswordMatch === true) {
+					let salt: string = genSalt(10);
+					let updated_data: IUserUpdate = {
+						id: ctx.user_id,
+						password: hashPassword(ctx.new_password, salt),
+						password_salt: salt
+					}
+
+					let del_token = await this.tokenQuery.deleteTokenByUserId(ctx.user_id);
+
+					if (del_token.hasOwnProperty('error')) resolve(del_token);
+					else {
+						let result = await this.userQuery.updatePasswordUser(updated_data);
+						if (result.hasOwnProperty('error')) resolve(result);
+						else resolve({message: 'success'});
+					}
+					
+				} else {
+					resolve({error: 'Invalid password', message: 'Authen: Invalid request'})
+				}
 			}
 		});
 	}

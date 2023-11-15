@@ -111,6 +111,41 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IStatusChangePassword": {
+				"properties": {
+					"error": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUserChangePassword": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"new_password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"password",
+					"new_password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IStatusToken": {
 				"properties": {
 					"status": {
@@ -1076,6 +1111,49 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/v1/password/change": {
+			"post": {
+				"operationId": "ChangePassword",
+				"responses": {
+					"200": {
+						"description": "Change password",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IStatusChangePassword"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUserChangePassword"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/status/token": {

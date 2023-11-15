@@ -78,3 +78,23 @@ export const checkRoleUserAccess = async (req: Request, res: Response, next: Nex
 		} else next();
 	}
 }
+
+export const checkRoleUserUpdate = async (req: Request, res: Response, next: NextFunction) => {
+	if (noAuth) next();
+	else {
+		const roles: string[] = req.body.token.roles;
+		if (isSingleRole(roles, Role.User)) {
+			try {
+			  const user_id: string = (req.body.user_id).toString();
+				const uid: string = (req.body.token.uid).toString();
+
+				if (user_id !== uid) res.status(401).send({message: "Access deny"});
+				else next();
+			} catch (err) {
+				console.log(err);
+				res.status(401).send({message: "Access deny"});
+			}
+			
+		} else next();
+	}
+}

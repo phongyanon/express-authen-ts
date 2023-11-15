@@ -63,3 +63,13 @@ export interface IVerifyToken {
     result: JwtPayload | null
 }
   
+export interface IUserChangePassword {
+    user_id: string
+    password: string
+    new_password: string
+}
+
+export interface IStatusChangePassword {
+    error?: string
+    message: string
+}

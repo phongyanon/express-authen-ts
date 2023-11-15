@@ -14,7 +14,7 @@ router.get("/tokens", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req
   else res.status(200).send(result);
 });
 
-router.get("/user/tokens/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin]), checkRoleUserAccess, async (req: Request, res: Response) => {
+router.get("/user/tokens/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
   const user_id: string = (req.params.user_id).toString();
   let result: IResponse | IToken = await token.getTokenByUserId(user_id);
   

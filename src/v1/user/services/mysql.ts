@@ -119,6 +119,36 @@ export class Query {
 		});
 	}
 
+	updatePasswordUser(ctx: IUserUpdate){
+		return new Promise( resolve => {
+			let props: string[] = ['password', 'password_salt'];
+			let set_field: string = '';
+			let update_data: any = [];
+
+			props.forEach( (field: string) => {
+				if (ctx.hasOwnProperty(field)) {
+
+					set_field += `${field} = ?,`;
+					let key = field as string;
+					update_data.push(ctx[key as keyof IUserUpdate]);
+
+				}
+			});
+			update_data.push(ctx.id);
+
+			this.con.execute<ResultSetHeader>(`UPDATE User SET ${set_field.slice(0, -1)} WHERE id = ?; `, update_data,
+				(err, result) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if(result.affectedRows === 1){
+							resolve({message: "Successfully update", id: ctx.id});
+						} 
+						else resolve({error: true, message: 'User: update item failed'});
+					}
+				});
+		});
+	}
+
 	deleteUser(id: string){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('DELETE FROM User WHERE id = ?;', [id], 

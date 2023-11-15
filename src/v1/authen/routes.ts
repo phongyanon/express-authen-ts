@@ -8,8 +8,11 @@ import {
   IStatusToken, 
   IAuthRefreshToken, 
   IAuthAccessTokenResp,
-  IAuthRefreshTokenResp } from "./authen.type";
-import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
+  IAuthRefreshTokenResp,
+  IUserChangePassword,
+  IStatusChangePassword
+ } from "./authen.type";
+import { auth, checkRole, checkRoleUserAccess, checkRoleUserUpdate } from "../middleware/authen";
 import { Role } from "../utils/role";
 import { Controller } from "./controllers";
 
@@ -82,6 +85,16 @@ router.post("/auth/refresh/tokens", async (req: Request, res: Response) => {
   let result: IResponse | IAuthRefreshTokenResp = await authen.authBothTokens(refreshToken);
   if (result.hasOwnProperty('error')){
     res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.post("/password/change", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserUpdate, async (req: Request, res: Response) => {
+  const newPassword: IUserChangePassword = req.body;
+  let result: IResponse | IStatusChangePassword = await authen.changePassword(newPassword);
+  if (result.hasOwnProperty('error')){
+    if (result.error === 'Invalid password') res.status(400).send(result);
+    else res.status(500).send(result);
   }
   else res.status(200).send(result);
 });

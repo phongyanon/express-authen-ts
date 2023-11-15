@@ -205,6 +205,80 @@ describe("Authentication", () => {
     expect(res.body.message).toBe('Please authenticate');
   });
 
+  test("Change password", async () => {
+    const res = await request(app).post(`/${api_version}/password/change`)
+      .set('Authorization', `Bearer ${result_access_token}`)
+      .send({
+        user_id: user_id,
+        password: test_users[0].password,
+        new_password: "test1111"
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('success');
+    test_users[0].password = "test1111";
+
+    // check tokens should be revoked.
+    const tokens_res = await request(app).get(`/${api_version}/user/tokens/${user_id}`)
+    .set('Authorization', `Bearer ${result_access_token}`);
+
+    expect(tokens_res.statusCode).toBe(404);
+    expect(tokens_res.body).toHaveProperty('error');
+    expect(tokens_res.body).toHaveProperty('message');
+
+    expect(tokens_res.body.error).toBe(true);
+    expect(tokens_res.body.message).toBe('Token: item does not exist');
+
+  });
+
+  test("Change password but wrong user_id", async () => {
+    const res = await request(app).post(`/${api_version}/password/change`)
+      .set('Authorization', `Bearer ${result_access_token}`)
+      .send({
+        user_id: "wrong_id",
+        password: "wrong_password",
+        new_password: "test2222"
+      });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Access deny');
+
+  });
+
+  test("Change password but wrong password", async () => {
+    const res = await request(app).post(`/${api_version}/password/change`)
+      .set('Authorization', `Bearer ${result_access_token}`)
+      .send({
+        user_id: user_id,
+        password: "wrong_password",
+        new_password: "test2222"
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+  
+    expect(res.body.message).toBe('Authen: Invalid request');
+    expect(res.body.error).toBe('Invalid password');
+
+  });
+
+  test("Sign in new password", async () => {
+    const res = await request(app).post(`/${api_version}/signin`).send({
+      username: test_users[0].username,
+      password: 'test1111'
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('refresh_token');
+    expect(res.body).toHaveProperty('access_token');
+
+    result_access_token = res.body.access_token;
+    result_refresh_token = res.body.refresh_token;
+  });
+
   test("Role User access", async () => {
     const res = await request(app)
       .get(`/${api_version}/test/role/user`)
