@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import Randomstring from 'randomstring';
 import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 import { IAccessTokenPayload, IRefreshTokenPayload } from "./common.type";
 import dotenv from 'dotenv';
@@ -61,4 +62,12 @@ export const verifyRefreshToken = async (token: string) => {
 export const addMinutes = (date: Date, minutes: number) => {
 	date.setMinutes(date.getMinutes() + minutes);
 	return Math.floor(date.valueOf() / 1000)
+}
+
+export const genResetPasswordToken = (len: number) => {
+	let gen_token = Randomstring.generate({
+		length: len,
+		charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!_+-'
+	})
+	return gen_token;
 }

@@ -16,3 +16,15 @@ export interface IRefreshTokenPayload {
     uid: string
     username: string
 }
+
+export interface ISendMail {
+    email_to: string
+    subject: string
+    text: string
+}
+
+export interface ISendMailResp {
+    error?: boolean
+    success?: boolean
+    message: string
+}

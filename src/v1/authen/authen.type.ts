@@ -47,6 +47,14 @@ export interface IAuthRefreshToken {
     refresh_token: string
 }
 
+export interface IResetPasswordByEmail {
+    email: string
+}
+
+export interface INewPassword {
+    new_password: string
+}
+
 export interface IAuthRefreshTokenResp {
     access_token: string
     access_token_expires_at: string

@@ -24,9 +24,11 @@ import {
 	IAuthAccessTokenResp,
 	IVerifyToken,
 	IUserChangePassword,
-	IStatusChangePassword
+	IStatusChangePassword,
+	IResetPasswordByEmail,
+	INewPassword
 } from './authen.type';
-import { IResponse, ISuccessResponse } from "../utils/common.type";
+import { IResponse, ISuccessResponse, ISendMailResp } from "../utils/common.type";
 import { IToken } from '../token/token.type';
 import { Request as Req } from "express";
 import { 
@@ -37,13 +39,16 @@ import {
   genRefreshToken, 
   verifyAccessToken, 
   verifyRefreshToken,
-	addMinutes
+	addMinutes,
+	genResetPasswordToken
 } from "../utils/helper";
+import { sendMail } from '../utils/email';
 import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Request } from "tsoa";
 
 dotenv.config();
 const access_token_age: number = 60*24; // 1 day
 const refresh_token_age: number = 60*24*7; // 7 days
+const reset_password_token_age: number = 15; // 15 minutes
 
 @Route("v1")
 export class Controller {
@@ -284,6 +289,120 @@ export class Controller {
 					resolve({error: 'Invalid password', message: 'Authen: Invalid request'})
 				}
 			}
+		});
+	}
+
+	@Post("/password/reset/generate")
+	@SuccessResponse("200", "Generate reset password token by email")
+	@Example<IStatusChangePassword>({
+		message: 'success'
+  })
+	genResetPasswordToken(@Body() ctx: IResetPasswordByEmail): Promise<IResponse | IStatusChangePassword>{
+		return new Promise( async resolve => {
+			let user_email = await this.userQuery.getUserByEmail(ctx.email);
+			if (user_email.hasOwnProperty('error')) {
+
+				if (user_email.hasOwnProperty('message')){
+					if (user_email.message ===  'User: item does not exist'){
+						resolve({error: 'Email does not exist', message: 'Authen: Invalid request'})
+					} else resolve(user_email);
+				} else resolve(user_email);
+
+			}
+			else {
+				
+				let user_verification = await this.verificationQuery.getVerificationByUserId(user_email.id);
+
+				if (user_verification.hasOwnProperty('error')) resolve(user_verification);
+				else {
+					let reset_token: string = genResetPasswordToken(64); // token length 64
+					let salt: string = genSalt(10);
+					let date = new Date();
+
+					let gen_reset_token = await this.verificationQuery.updateVerification({
+						id: user_verification.id,
+						reset_password_token: hashPassword(reset_token, salt),
+						reset_password_token_expires_at: addMinutes(date, reset_password_token_age)
+					})
+
+					if (gen_reset_token.hasOwnProperty('error')) resolve(gen_reset_token);
+					else {
+						
+						if (process.env.NODE_ENV === 'test') {
+							resolve({message: 'success'});
+						} else {
+							// send reset_password_link to email
+							let reset_password_link: string = `localhost:8000/v1/reset/password/?user_id=${user_email.id}&token=${reset_token}`;
+							let send_mail_result: ISendMailResp = await sendMail({
+								email_to: user_email.email,
+								subject: `Reset password from my auth platform to ${user_email.email}`,
+								text: `Your reset password link: ${reset_password_link}`
+							});
+							
+							if (send_mail_result.hasOwnProperty('error')) resolve(send_mail_result);
+							else resolve({message: 'success'});
+						}
+					}
+
+				}
+			}
+		});
+	}
+
+	@Put("/reset/password/{user_id}/{token}")
+	@SuccessResponse("200", "Reset password from email")
+	@Example<IStatusChangePassword>({
+		message: 'success'
+  })
+	resetPasswordByResetPasswordToken(
+		@Path() user_id: string, @Path() token: string, @Body() ctx: INewPassword
+	): Promise<IResponse | IStatusChangePassword>{
+		return new Promise( async resolve => {
+			let user_result = await this.userQuery.getUser(user_id);
+			if (user_result.hasOwnProperty('error')) {
+
+				if (user_result.hasOwnProperty('message')){
+					if (user_result.message ===  'User: item does not exist'){
+						resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'})
+					} else resolve(user_result);
+				} else resolve(user_result);
+
+			}
+			else {
+
+				let user_verification = await this.verificationQuery.getVerificationByUserId(user_result.id);
+
+				if (user_verification.hasOwnProperty('error')) resolve(user_verification);
+				else {
+					let isTokenMatch: boolean = comparePassword(token, user_verification.reset_password_token);
+					let now = new Date();
+
+					if ((now > user_verification.reset_password_token_expires_at) && (isTokenMatch === true)) {
+						
+						let salt: string = genSalt(10);
+						let updated_data: IUserUpdate = {
+							id: user_result.id,
+							password: hashPassword(ctx.new_password, salt),
+							password_salt: salt
+						}
+
+						let del_token = await this.tokenQuery.deleteTokenByUserId(user_result.id);
+
+						if (del_token.hasOwnProperty('error')) resolve(del_token);
+						else {
+							let result = await this.userQuery.updatePasswordUser(updated_data);
+							if (result.hasOwnProperty('error')) resolve(result);
+							else resolve({message: 'success'});
+						}
+
+					} else {
+						resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'})
+					}
+				}
+
+			}
+
+
 		});
 	}
 

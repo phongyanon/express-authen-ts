@@ -279,6 +279,75 @@ describe("Authentication", () => {
     result_refresh_token = res.body.refresh_token;
   });
 
+  test("Forgot password but not found email", async () => {
+    const res = await request(app).post(`/${api_version}/password/reset/generate`).send({
+      email: 'notfound@email.com'
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+  
+    expect(res.body.message).toBe('Authen: Invalid request');
+    expect(res.body.error).toBe('Email does not exist');
+  });
+
+  test("Forgot password", async () => {
+    const res = await request(app).post(`/${api_version}/password/reset/generate`).send({
+      email: test_users[0].email
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('success');
+  });
+
+  // User can get own reset password token because it's hashed.
+  test("Get forgot password token", async () => {
+    const res = await verificationController.getVerificationByUserId(user_id);
+
+    expect(res).toHaveProperty('user_id');
+    expect(res).toHaveProperty('reset_password_token');
+    expect(res).toHaveProperty('reset_password_token_expires_at');
+  });
+
+  test("Reset Forgot password but wrong token", async () => {
+    const res = await request(app).put(`/${api_version}/reset/password/${user_id}/fake_token`).send({
+      new_password: 'test2222'
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+  
+    expect(res.body.message).toBe('Authen: Invalid request');
+    expect(res.body.error).toBe('Invalid token or user');
+  });
+
+  test("Reset Forgot password but wrong user_id", async () => {
+    const res = await request(app).put(`/${api_version}/reset/password/9999999/fake_token`).send({
+      new_password: 'test2222'
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+  
+    expect(res.body.message).toBe('Authen: Invalid request');
+    expect(res.body.error).toBe('Invalid token or user');
+  });
+
+  // test in postman
+  // test("Reset Forgot password", async () => {
+  //   const res = await request(app).put(`/${api_version}/reset/password/${user_id}/${reset_password_token}`).send({
+  //     new_password: 'test2222'
+  //   });
+
+  //   expect(res.statusCode).toBe(200);
+  //   expect(res.body).toHaveProperty('message');
+  //   expect(res.body.message).toBe('success');
+  // });
+
   test("Role User access", async () => {
     const res = await request(app)
       .get(`/${api_version}/test/role/user`)

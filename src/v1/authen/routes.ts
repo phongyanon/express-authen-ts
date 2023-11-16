@@ -10,7 +10,9 @@ import {
   IAuthAccessTokenResp,
   IAuthRefreshTokenResp,
   IUserChangePassword,
-  IStatusChangePassword
+  IStatusChangePassword,
+  IResetPasswordByEmail,
+  INewPassword
  } from "./authen.type";
 import { auth, checkRole, checkRoleUserAccess, checkRoleUserUpdate } from "../middleware/authen";
 import { Role } from "../utils/role";
@@ -94,6 +96,29 @@ router.post("/password/change", auth, checkRole([Role.SuperAdmin, Role.Admin, Ro
   let result: IResponse | IStatusChangePassword = await authen.changePassword(newPassword);
   if (result.hasOwnProperty('error')){
     if (result.error === 'Invalid password') res.status(400).send(result);
+    else res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.post("/password/reset/generate", async (req: Request, res: Response) => {
+  const body: IResetPasswordByEmail = req.body;
+  let result: IResponse | IStatusChangePassword = await authen.genResetPasswordToken(body);
+  if (result.hasOwnProperty('error')){
+    if (result.error === 'Email does not exist') res.status(404).send(result);
+    else res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.put("/reset/password/:user_id/:token", async (req: Request, res: Response) => {
+  const user_id: string = (req.params.user_id).toString();
+  const token: string = (req.params.token).toString();
+  const body: INewPassword = req.body;
+
+  let result: IResponse | IStatusChangePassword = await authen.resetPasswordByResetPasswordToken(user_id, token, body);
+  if (result.hasOwnProperty('error')){
+    if (result.error === 'Invalid token or user') res.status(400).send(result);
     else res.status(500).send(result);
   }
   else res.status(200).send(result);
