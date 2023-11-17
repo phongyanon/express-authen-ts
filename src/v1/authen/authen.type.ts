@@ -55,6 +55,11 @@ export interface INewPassword {
     new_password: string
 }
 
+export interface IQueryVerifyEmail {
+    user_id: string
+    token: string
+}
+
 export interface IAuthRefreshTokenResp {
     access_token: string
     access_token_expires_at: string

@@ -15,17 +15,28 @@ export const sendMail = function(ctx: ISendMail){
             pass: process.env.MAILER_PASSWORD?.toString()
           }
       });
-
-			console.log('>> ', transporter)
           
       let mailOptions: MailOptions = {
         from: process.env.MAILER_USERNAME,
         to: ctx.email_to,
         subject: ctx.subject, // 'User my auth platform reset password',
-        text: ctx.text //'For my auth platform your url to reset password is http://localhost:8000.'
+        // text: ctx.text //'For my auth platform your url to reset password is http://localhost:8000.'
+        html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <title>Email Example</title>
+          <style>
+            /* Your CSS styles here */
+          </style>
+        </head>
+        <body>
+          ${ctx.text}
+        </body>
+        </html>
+        `
       };
-
-			console.log('>> ', mailOptions)
           
       transporter.sendMail(mailOptions, function(error, info){
         if (error) {
@@ -34,8 +45,6 @@ export const sendMail = function(ctx: ISendMail){
           resolve({success: true, message: `Email sent: ${info.response}`});
         }
       });
-			// test
-			// resolve({success: true, message: `Email sent:`});
     });
 }
 

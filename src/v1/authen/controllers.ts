@@ -26,11 +26,12 @@ import {
 	IUserChangePassword,
 	IStatusChangePassword,
 	IResetPasswordByEmail,
-	INewPassword
+	INewPassword,
+	IQueryVerifyEmail
 } from './authen.type';
 import { IResponse, ISuccessResponse, ISendMailResp } from "../utils/common.type";
 import { IToken } from '../token/token.type';
-import { Request as Req } from "express";
+import { Request as Req, query } from "express";
 import { 
   hashPassword, 
   genSalt, 
@@ -43,12 +44,13 @@ import {
 	genResetPasswordToken
 } from "../utils/helper";
 import { sendMail } from '../utils/email';
-import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Request } from "tsoa";
+import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Request, Queries } from "tsoa";
 
 dotenv.config();
 const access_token_age: number = 60*24; // 1 day
 const refresh_token_age: number = 60*24*7; // 7 days
 const reset_password_token_age: number = 15; // 15 minutes
+const verify_email_token_age: number = 60*24; // 1 day
 
 @Route("v1")
 export class Controller {
@@ -332,11 +334,17 @@ export class Controller {
 							resolve({message: 'success'});
 						} else {
 							// send reset_password_link to email
-							let reset_password_link: string = `localhost:8000/v1/reset/password/?user_id=${user_email.id}&token=${reset_token}`;
+							let reset_password_link: string = `127.0.0.1:8000/v1/reset/password/?user_id=${user_email.id}&token=${reset_token}`;
 							let send_mail_result: ISendMailResp = await sendMail({
 								email_to: user_email.email,
 								subject: `Reset password from my auth platform to ${user_email.email}`,
-								text: `Your reset password link: ${reset_password_link}`
+								text: `
+									<h1>Reset password</h1>
+									<p>Your reset password link: ${reset_password_link}</p><br/>
+									<button type="submit" formmethod="get">
+										<a href="${reset_password_link}">Click here to reset password</a>
+									</button>
+									`
 							});
 							
 							if (send_mail_result.hasOwnProperty('error')) resolve(send_mail_result);
@@ -374,35 +382,148 @@ export class Controller {
 
 				if (user_verification.hasOwnProperty('error')) resolve(user_verification);
 				else {
-					let isTokenMatch: boolean = comparePassword(token, user_verification.reset_password_token);
-					let now = new Date();
-
-					if ((now > user_verification.reset_password_token_expires_at) && (isTokenMatch === true)) {
-						
-						let salt: string = genSalt(10);
-						let updated_data: IUserUpdate = {
-							id: user_result.id,
-							password: hashPassword(ctx.new_password, salt),
-							password_salt: salt
-						}
-
-						let del_token = await this.tokenQuery.deleteTokenByUserId(user_result.id);
-
-						if (del_token.hasOwnProperty('error')) resolve(del_token);
-						else {
+					if (user_verification.reset_password_token === null) {
+						resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'});
+					} else {
+						let isTokenMatch: boolean = comparePassword(token, user_verification.reset_password_token);
+						let now = new Date();
+	
+						if ((now.valueOf() < user_verification.reset_password_token_expires_at * 1000) && (isTokenMatch === true)) {
+							
+							let salt: string = genSalt(10);
+							let updated_data: IUserUpdate = {
+								id: user_result.id,
+								password: hashPassword(ctx.new_password, salt),
+								password_salt: salt
+							}
+	
+							await this.tokenQuery.deleteTokenByUserId(user_result.id);
 							let result = await this.userQuery.updatePasswordUser(updated_data);
 							if (result.hasOwnProperty('error')) resolve(result);
 							else resolve({message: 'success'});
+	
+						} else {
+							resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'})
 						}
+					}
+				}
+			}
 
-					} else {
+
+		});
+	}
+
+	
+	@Post("/email/token/generate")
+	@SuccessResponse("200", "Generate verify email token")
+	@Example<IStatusChangePassword>({
+		message: 'success'
+  })
+	genVerifyEmailToken(@Body() ctx: IResetPasswordByEmail): Promise<IResponse | IStatusChangePassword>{
+		return new Promise( async resolve => {
+			let user_email = await this.userQuery.getUserByEmail(ctx.email);
+			if (user_email.hasOwnProperty('error')) {
+
+				if (user_email.hasOwnProperty('message')){
+					if (user_email.message ===  'User: item does not exist'){
+						resolve({error: 'Email does not exist', message: 'Authen: Invalid request'})
+					} else resolve(user_email);
+				} else resolve(user_email);
+
+			}
+			else {
+				
+				let user_verification = await this.verificationQuery.getVerificationByUserId(user_email.id);
+
+				if (user_verification.hasOwnProperty('error')) resolve(user_verification);
+				else {
+					let verify_token: string = genResetPasswordToken(64); // token length 64
+					let salt: string = genSalt(10);
+					let date = new Date();
+
+					let gen_verify_token = await this.verificationQuery.updateVerification({
+						id: user_verification.id,
+						verify_email_token: hashPassword(verify_token, salt),
+						verify_email_token_expires_at: addMinutes(date, verify_email_token_age)
+					})
+
+					if (gen_verify_token.hasOwnProperty('error')) resolve(gen_verify_token);
+					else {
+						
+						if (process.env.NODE_ENV === 'test') {
+							resolve({message: 'success'});
+						} else {
+							// send link button to verify email
+							let verify_email_link: string = `127.0.0.1:8000/v1/email/token/verify/?user_id=${user_email.id}&token=${verify_token}`;
+							let send_mail_result: ISendMailResp = await sendMail({
+								email_to: user_email.email,
+								subject: `Verify Email from my auth platform to ${user_email.email}`,
+								text: `
+									<h1>Verify Email</h1>
+									<div>Click button below to verify your email.</div>
+									<div>link: ${verify_email_link}</div>
+									<form action="${verify_email_link}" method="post" target="_blank">
+										<button type="submit" formmethod="post">Verify Email</button>
+									</form>
+									`
+							});
+							
+							if (send_mail_result.hasOwnProperty('error')) resolve(send_mail_result);
+							else resolve({message: 'success'});
+						}
+					}
+
+				}
+			}
+		});
+	}
+
+	@Post("/email/token/verify")
+	@SuccessResponse("200", "Verify email")
+	@Example<IStatusChangePassword>({
+		message: 'success'
+  })
+	verifyEmail(@Queries() query: IQueryVerifyEmail): Promise<IResponse | IStatusChangePassword>{
+		return new Promise( async resolve => {
+			let user_result = await this.userQuery.getUser(query.user_id);
+			if (user_result.hasOwnProperty('error')) {
+
+				if (user_result.hasOwnProperty('message')){
+					if (user_result.message ===  'User: item does not exist'){
 						resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'})
+					} else resolve(user_result);
+				} else resolve(user_result);
+
+			}
+			else {
+
+				let user_verification = await this.verificationQuery.getVerificationByUserId(user_result.id);
+
+				if (user_verification.hasOwnProperty('error')) resolve(user_verification);
+				else {
+					if (user_verification.verify_email_token === null){
+						resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'})
+					} else {
+						let isTokenMatch: boolean = comparePassword(query.token, user_verification.verify_email_token);
+						let now = new Date();
+		
+						if ((now.valueOf() < user_verification.verify_email_token_expires_at * 1000) && (isTokenMatch === true)) {
+	
+							let result = await this.verificationQuery.updateVerification({
+								id: user_verification.id,
+								email_verified: true
+							});
+	
+							if (result.hasOwnProperty('error')) resolve(result);
+							else resolve({message: 'success'});
+	
+						} else {
+							resolve({error: 'Invalid token or user', message: 'Authen: Invalid request'});
+						}
 					}
 				}
 
 			}
-
-
 		});
 	}
 

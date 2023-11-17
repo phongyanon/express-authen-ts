@@ -348,6 +348,46 @@ describe("Authentication", () => {
   //   expect(res.body.message).toBe('success');
   // });
 
+  test("Generate verify email token but not found email", async () => {
+    const res = await request(app).post(`/${api_version}/email/token/generate`).send({
+      email: 'notfound@email.com'
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('error');
+  
+    expect(res.body.message).toBe('Authen: Invalid request');
+    expect(res.body.error).toBe('Email does not exist');
+  });
+
+  test("Generate verify email token", async () => {
+    const res = await request(app).post(`/${api_version}/email/token/generate`).send({
+      email: test_users[0].email
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('success');
+  });
+
+  test("Get verify email token", async () => {
+    const res = await verificationController.getVerificationByUserId(user_id);
+
+    expect(res).toHaveProperty('user_id');
+    expect(res).toHaveProperty('verify_email_token');
+    expect(res).toHaveProperty('verify_email_token_expires_at');
+  });
+
+  // test in postman
+  // test("Verify email token but not found email", async () => {
+  //   const res = await request(app).post(`/${api_version}/email/token/verify?user_id=${user_id}&token=${verify_email_token}`)
+
+  //   expect(res.statusCode).toBe(200);
+  //   expect(res.body).toHaveProperty('message');
+  //   expect(res.body.message).toBe('success');
+  // });
+
   test("Role User access", async () => {
     const res = await request(app)
       .get(`/${api_version}/test/role/user`)

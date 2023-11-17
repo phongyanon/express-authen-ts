@@ -12,7 +12,8 @@ import {
   IUserChangePassword,
   IStatusChangePassword,
   IResetPasswordByEmail,
-  INewPassword
+  INewPassword,
+  IQueryVerifyEmail
  } from "./authen.type";
 import { auth, checkRole, checkRoleUserAccess, checkRoleUserUpdate } from "../middleware/authen";
 import { Role } from "../utils/role";
@@ -123,6 +124,30 @@ router.put("/reset/password/:user_id/:token", async (req: Request, res: Response
   }
   else res.status(200).send(result);
 });
+
+router.post("/email/token/generate", async (req: Request, res: Response) => {
+  const body: IResetPasswordByEmail = req.body;
+  let result: IResponse | IStatusChangePassword = await authen.genVerifyEmailToken(body);
+  if (result.hasOwnProperty('error')){
+    if (result.error === 'Email does not exist') res.status(404).send(result);
+    else res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.post("/email/token/verify", async (req: Request, res: Response) => {
+  const query: IQueryVerifyEmail = {
+    user_id: req.query?.user_id  === undefined ? '' : req.query.user_id.toString(),
+    token: req.query?.token === undefined ? '' : req.query.token.toString()
+  };
+  let result: IResponse | IStatusChangePassword = await authen.verifyEmail(query);
+  if (result.hasOwnProperty('error')){
+    if (result.error === 'Email does not exist') res.status(404).send(result);
+    else res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
 
 router.post("/revoke/token/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
   const user_id: string = (req.params.user_id).toString();

@@ -170,6 +170,22 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IQueryVerifyEmail": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"token"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IStatusToken": {
 				"properties": {
 					"status": {
@@ -1281,6 +1297,99 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/email/token/generate": {
+			"post": {
+				"operationId": "GenVerifyEmailToken",
+				"responses": {
+					"200": {
+						"description": "Generate verify email token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IStatusChangePassword"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IResetPasswordByEmail"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/email/token/verify": {
+			"post": {
+				"operationId": "VerifyEmail",
+				"responses": {
+					"200": {
+						"description": "Verify email",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IStatusChangePassword"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "user_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "token",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/status/token": {

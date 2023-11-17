@@ -67,7 +67,7 @@ export const addMinutes = (date: Date, minutes: number) => {
 export const genResetPasswordToken = (len: number) => {
 	let gen_token = Randomstring.generate({
 		length: len,
-		charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!_+-'
+		charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!_-'
 	})
 	return gen_token;
 }
