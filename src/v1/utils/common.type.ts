@@ -28,3 +28,9 @@ export interface ISendMailResp {
     success?: boolean
     message: string
 }
+
+export interface IUploadFileResp {
+    success: boolean
+    message: string
+    data?: any
+}

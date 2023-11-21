@@ -13,6 +13,8 @@ import { router as uesrRoleRoutes } from "./src/v1/userRole/routes";
 import { router as profileRoutes } from "./src/v1/profile/routes";
 import { router as settingRoutes } from "./src/v1/setting/routes";
 
+import { router as fileRoutes } from "./src/v1/file/routes";
+
 const app: Application = express();
 const corsOptions: cors.CorsOptions = {
   origin: '*',
@@ -40,6 +42,8 @@ app.use("/v1", roleRoutes);
 app.use("/v1", uesrRoleRoutes);
 app.use("/v1", profileRoutes);
 app.use("/v1", settingRoutes);
+
+app.use("/v1", fileRoutes);
 
 app.use(express.static("public"));
 app.use(

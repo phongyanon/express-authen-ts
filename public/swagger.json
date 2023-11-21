@@ -1554,6 +1554,39 @@
 				]
 			}
 		},
+		"/v1/upload/profile/image": {
+			"post": {
+				"operationId": "UploadToGoogleDrive",
+				"responses": {
+					"200": {
+						"description": "Upload image profile",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/v1/profiles": {
 			"get": {
 				"operationId": "GetProfiles",
