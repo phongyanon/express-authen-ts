@@ -1554,7 +1554,7 @@
 				]
 			}
 		},
-		"/v1/upload/profile/image": {
+		"/v1/upload/profile/image/{user_id}": {
 			"post": {
 				"operationId": "UploadToGoogleDrive",
 				"responses": {
@@ -1584,7 +1584,16 @@
 					}
 				},
 				"security": [],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/profiles": {
