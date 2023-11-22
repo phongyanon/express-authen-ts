@@ -71,3 +71,11 @@ export const genResetPasswordToken = (len: number) => {
 	})
 	return gen_token;
 }
+
+export const genStringToken = (len: number) => {
+	let gen_token = Randomstring.generate({
+		length: len,
+		charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!_-+*@#$%&'
+	})
+	return gen_token;
+}

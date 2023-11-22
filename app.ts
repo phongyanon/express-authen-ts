@@ -14,6 +14,7 @@ import { router as profileRoutes } from "./src/v1/profile/routes";
 import { router as settingRoutes } from "./src/v1/setting/routes";
 
 import { router as fileRoutes } from "./src/v1/file/routes";
+import { router as twoFactorAuthenRoutes } from "./src/v1/2factorAuthen/routes";
 
 const app: Application = express();
 const corsOptions: cors.CorsOptions = {
@@ -44,6 +45,7 @@ app.use("/v1", profileRoutes);
 app.use("/v1", settingRoutes);
 
 app.use("/v1", fileRoutes);
+app.use("/v1", twoFactorAuthenRoutes);
 
 app.use(express.static("public"));
 app.use(
