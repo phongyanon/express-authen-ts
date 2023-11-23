@@ -345,6 +345,102 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IUserVerifyOTP": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"enable_otp": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"user_id",
+					"username",
+					"email",
+					"enable_otp"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IVerifyOTPResp": {
+				"properties": {
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"user": {
+						"$ref": "#/components/schemas/IUserVerifyOTP"
+					}
+				},
+				"required": [
+					"otp_verified",
+					"user"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IVerifyOTP": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"token_otp": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"token_otp"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IValidateOTPResp": {
+				"properties": {
+					"otp_valid": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"otp_valid"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IDisableOTPResp": {
+				"properties": {
+					"otp_disabled": {
+						"type": "boolean"
+					},
+					"user": {
+						"$ref": "#/components/schemas/IUserVerifyOTP"
+					}
+				},
+				"required": [
+					"otp_disabled",
+					"user"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IDisableOTP": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IUserSignUp": {
 				"properties": {
 					"username": {
@@ -1555,7 +1651,7 @@
 				"operationId": "GenerateOTP",
 				"responses": {
 					"200": {
-						"description": "Created",
+						"description": "Created otp",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1582,6 +1678,147 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/v1/otp/verify": {
+			"post": {
+				"operationId": "VerifyOTP",
+				"responses": {
+					"200": {
+						"description": "Verify otp",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IVerifyOTPResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"otp_verified": true,
+											"user": {
+												"user_id": "user_id",
+												"username": "John",
+												"email": "John@email.com",
+												"enable_otp": true
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IVerifyOTP"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/otp/validate": {
+			"post": {
+				"operationId": "ValidateOTP",
+				"responses": {
+					"200": {
+						"description": "Validate otp",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IValidateOTPResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"otp_valid": true
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IVerifyOTP"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/otp/disable": {
+			"post": {
+				"operationId": "DisableOTP",
+				"responses": {
+					"200": {
+						"description": "Disable otp",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IDisableOTPResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"otp_disabled": true,
+											"user": {
+												"user_id": "user_id",
+												"username": "John",
+												"email": "John@email.com",
+												"enable_otp": true
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IDisableOTP"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/signup": {
