@@ -2,20 +2,20 @@ import { IUserInsert } from "./user.test"
 
 export const mockUsers: IUserInsert[] = [
     {
-        username: 'john@email.com',
-        password: 'test1234',
+        username: 'jojo',
+        password: 'test5678',
         password_salt: 'test',
-        email: 'john@email.com',
+        email: 'jojo@email.com',
         is_sso_user: false,
         sso_user_id: null,
         sso_from: null, 
         status: 'active'
     },
     {
-        username: 'doe',
+        username: 'don',
         password: 'test5678',
         password_salt: 'test',
-        email: 'doe@email.com',
+        email: 'don@email.com',
         is_sso_user: false,
         sso_user_id: null,
         sso_from: null, 

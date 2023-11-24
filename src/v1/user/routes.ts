@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
-import { IUserInsert, IUserUpdate, IUser } from "./user.type";
+import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp } from "./user.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
 import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role, isSingleRole } from "../utils/role";
@@ -55,6 +55,17 @@ router.delete("/user/:id", auth, checkRole([Role.SuperAdmin, Role.Admin]), async
     if (result.hasOwnProperty('message')) res.status(404).send(result);
     else res.status(500).send(result);
   }
+  else res.status(200).send(result);
+});
+
+router.get("/pagination/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
+  const query: IPaginationUser = {
+    page: req.query?.page === undefined ? 0 : parseInt(req.query.page as string),
+    limit: req.query?.limit  === undefined ? 0 : parseInt(req.query.limit as string)
+  };
+  let result: IResponse | IPaginationUserResp = await user.getUserPagination(query);
+  
+  if (result.hasOwnProperty('error')) res.status(500).send(result);
   else res.status(200).send(result);
 });
 

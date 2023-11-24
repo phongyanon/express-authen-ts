@@ -71,6 +71,78 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IPaginationInfo": {
+				"properties": {
+					"total_records": {
+						"type": "number",
+						"format": "double"
+					},
+					"current_page": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_pages": {
+						"type": "number",
+						"format": "double"
+					},
+					"next_page": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prev_page": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"total_records",
+					"current_page",
+					"total_pages",
+					"next_page",
+					"prev_page"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaginationUserResp": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IUser"
+						},
+						"type": "array"
+					},
+					"pagination": {
+						"$ref": "#/components/schemas/IPaginationInfo"
+					}
+				},
+				"required": [
+					"data",
+					"pagination"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaginationUser": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"page",
+					"limit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ISuccessResponse": {
 				"properties": {
 					"error": {
@@ -1318,6 +1390,77 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/pagination/users": {
+			"get": {
+				"operationId": "GetUserPagination",
+				"responses": {
+					"200": {
+						"description": "Get users pagination",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IPaginationUserResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"data": [
+												{
+													"id": "3",
+													"username": "test2",
+													"password": "test1234",
+													"password_salt": "test",
+													"email": "john2@email.com",
+													"is_sso_user": false,
+													"sso_user_id": null,
+													"sso_from": null,
+													"status": "active"
+												}
+											],
+											"pagination": {
+												"total_records": 8,
+												"current_page": 1,
+												"total_pages": 3,
+												"next_page": 2,
+												"prev_page": null
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]

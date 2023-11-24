@@ -71,6 +71,34 @@ export class Query {
 		});
 	}
 
+	getUserPagination(limit: number, offset: number){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM User ORDER BY username, id LIMIT ? OFFSET ?;', [limit.toString(), offset.toString()], 
+				(err, row) => {
+					if (err) resolve({error: err.toString(), message: 'User: Invalid request'});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'User: Invalid request'});
+						else {
+							row[0].is_sso_user = row[0].is_sso_user === 0 ? false: true;
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
+	getUserCount(){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT COUNT(id) AS userCount FROM User;',
+				(err, row) => {
+					if (err) resolve({error: err.toString(), message: 'User: Invalid request'});
+					else {
+						resolve(row[0]);
+					}
+			});
+		});
+	}
+
 	addUser(ctx: IUserInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO User ( \

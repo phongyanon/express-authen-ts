@@ -38,3 +38,21 @@ export interface IUser {
   sso_from: string | null
   status: string
 }
+
+export interface IPaginationUser {
+  page: number
+  limit: number
+}
+
+interface IPaginationInfo {
+  total_records: number
+  current_page: number
+  total_pages: number
+  next_page: number | null
+  prev_page: number | null
+}
+
+export interface IPaginationUserResp {
+  data: IUser[]
+  pagination: IPaginationInfo
+}
