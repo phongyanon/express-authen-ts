@@ -453,6 +453,54 @@ describe("Authentication", () => {
 
   });
 
+  // User terminate own user then frontend should clear access and refresh tokens (user can't delete User).
+  test("Terminate User", async () => {
+    const res = await request(app).post(`/${api_version}/user/terminate`).send({user_id: user_id});
+    expect(res.statusCode).toBe(200);
+    
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('success');
+  });
+
+  test("Terminate User not found", async () => {
+    const res = await request(app).post(`/${api_version}/user/terminate`).send({user_id: 'test_user_id'});
+    expect(res.statusCode).toBe(404);
+    
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: item does not exist');
+  });
+
+  test("Terminate User can not sign in", async () => {
+    const res = await request(app).post(`/${api_version}/signin`).send({
+      username: test_users[0].username,
+      password: test_users[0].password
+    });
+    
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Unauthirize to access this route');
+  });
+
+  test("Terminate User can not get new access token", async () => {
+    const res = await request(app).post(`/${api_version}/auth/refresh/token`).send({
+      refresh_token: result_refresh_token
+    });
+    
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Unauthirize to access this route');
+  });
+
+  test("Terminate User can not get new refresh token", async () => {
+    const res = await request(app).post(`/${api_version}/auth/refresh/tokens`).send({
+      refresh_token: result_refresh_token
+    });
+    
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Unauthirize to access this route');
+  });
+
 
 	test("Sign out", async () => {
     const res = await request(app)
