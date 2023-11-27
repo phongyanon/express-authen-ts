@@ -86,3 +86,7 @@ export interface IStatusChangePassword {
     error?: string
     message: string
 }
+
+export interface ITerminateUser {
+    user_id: string
+}

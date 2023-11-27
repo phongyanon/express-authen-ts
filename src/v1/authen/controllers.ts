@@ -187,6 +187,8 @@ export class Controller {
 
 			} else if (check_user.hasOwnProperty('error')) {
 				resolve(check_user);
+			} else if (check_user.status === 'inactive'){
+				resolve({error: 'Inactive user', message: 'Unauthirize to access this route'});
 			} else {
 				let hash: string = check_user.password;
 				let isPasswordMatch: boolean = comparePassword(ctx.password, hash);
@@ -564,17 +566,25 @@ export class Controller {
 			if (verify_refresh.success === true){
 				let refresh_payload: IRefreshTokenPayload = verify_refresh.result as IRefreshTokenPayload
 
-				let user_token = await this.tokenQuery.getTokenByUserIdAndRefreshToken(refresh_payload.uid, body.refresh_token);
-				if (user_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+				let check_user = await this.userQuery.getUser(refresh_payload.uid);
+				if (check_user.hasOwnProperty('error')) resolve(check_user);
+				else if (check_user.status === 'inactive'){
+					resolve({error: 'Inactive user', message: 'Unauthirize to access this route'});
+				} else {
 
-				let access_payload: IAccessTokenPayload = { uid: refresh_payload.uid, username: refresh_payload.username }
-				let result_access: ITokenMethodResponse = await genAccessToken(access_payload);
+					let user_token = await this.tokenQuery.getTokenByUserIdAndRefreshToken(refresh_payload.uid, body.refresh_token);
+					if (user_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+	
+					let access_payload: IAccessTokenPayload = { uid: refresh_payload.uid, username: refresh_payload.username }
+					let result_access: ITokenMethodResponse = await genAccessToken(access_payload);
+	
+					if (result_access.success === true) {
+						resolve({access_token: result_access.result as string})
+					}
+	
+					resolve({error: true, message: 'Authen: Invalid request'})
 
-				if (result_access.success === true) {
-					resolve({access_token: result_access.result as string})
 				}
-
-				resolve({error: true, message: 'Authen: Invalid request'}) // delete this
 
 			} else {
 				resolve({error: true, message: 'Authen: Invalid request'})
@@ -594,39 +604,47 @@ export class Controller {
 			if (verify_refresh.success === true){
 				let refresh_payload: IRefreshTokenPayload = verify_refresh.result as IRefreshTokenPayload
 
-				let result_refresh: ITokenMethodResponse = await genRefreshToken({
-					uid: refresh_payload.uid, username: refresh_payload.username
-				});
-				let result_access: ITokenMethodResponse = await genAccessToken({
-					uid: refresh_payload.uid, username: refresh_payload.username
-				});
+				let check_user = await this.userQuery.getUser(refresh_payload.uid);
+				if (check_user.hasOwnProperty('error')) resolve(check_user);
+				else if (check_user.status === 'inactive'){
+					resolve({error: 'Inactive user', message: 'Unauthirize to access this route'});
+				} else {
 
-				if ((result_access.success === true) && (result_refresh.success === true)) {
-					// get Token by user_id and refresh_token
-					let user_token = await this.tokenQuery.getTokenByUserIdAndRefreshToken(refresh_payload.uid, body.refresh_token);
-					if (user_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
-					
-					let date = new Date();
-					let salt: string = genSalt(5);
+					let result_refresh: ITokenMethodResponse = await genRefreshToken({
+						uid: refresh_payload.uid, username: refresh_payload.username
+					});
+					let result_access: ITokenMethodResponse = await genAccessToken({
+						uid: refresh_payload.uid, username: refresh_payload.username
+					});
+	
+					if ((result_access.success === true) && (result_refresh.success === true)) {
+						// get Token by user_id and refresh_token
+						let user_token = await this.tokenQuery.getTokenByUserIdAndRefreshToken(refresh_payload.uid, body.refresh_token);
+						if (user_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+						
+						let date = new Date();
+						let salt: string = genSalt(5);
+	
+						let updated_token = await this.tokenQuery.updateToken({
+							id: user_token.id,
+							refresh_token: hashPassword(result_refresh.result as string, salt), 
+							refresh_token_expires_at: addMinutes(date, refresh_token_age),
+	
+							access_token: hashPassword(result_access.result as string, salt), 
+							access_token_expires_at: addMinutes(date, access_token_age), 
+						})
+	
+						if (updated_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
+	
+						resolve({
+							access_token: result_access.result,
+							refresh_token: result_refresh.result
+						})
+					}
+	
+					resolve({error: true, message: 'Authen: Invalid request'})
 
-					let updated_token = await this.tokenQuery.updateToken({
-						id: user_token.id,
-						refresh_token: hashPassword(result_refresh.result as string, salt), 
-						refresh_token_expires_at: addMinutes(date, refresh_token_age),
-
-						access_token: hashPassword(result_access.result as string, salt), 
-						access_token_expires_at: addMinutes(date, access_token_age), 
-					})
-
-					if (updated_token.hasOwnProperty('error')) resolve({error: true, message: 'Authen: Invalid request'})
-
-					resolve({
-						access_token: result_access.result,
-						refresh_token: result_refresh.result
-					})
 				}
-
-				resolve({error: true, message: 'Authen: Invalid request'})
 
 			} else {
 				resolve({error: true, message: 'Authen: Invalid request'})
@@ -652,6 +670,19 @@ export class Controller {
 			} else {
 				resolve(del_token);
 			}
+		});
+	}
+
+	@Post("/user/terminate")
+  @SuccessResponse("200", "Terminate user")
+	@Example<ISuccessResponse>({
+		"message": "success"
+  })
+	terminateUser(@Body() user_id: string): Promise<IResponse | ISuccessResponse>{
+		return new Promise( async resolve => {
+			let terminate_user = await this.userQuery.updateUser({ id: user_id, status: 'inactive' });
+			if (terminate_user.hasOwnProperty('error')) resolve(terminate_user);
+			else resolve({message: 'success'});
 		});
 	}
 

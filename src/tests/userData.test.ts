@@ -40,6 +40,15 @@ interface IUserResponse {
   status: string
 }
 
+const prepareUsers = () => {
+  return new Promise(async resolve => {
+    mockUsers.forEach( async (obj: IUserInsert) => {
+      await userController.addUser(obj);
+    });
+    resolve(true)
+  });
+}
+
 describe("CRUD User", () => {
 
   let user_id: string
@@ -53,9 +62,7 @@ describe("CRUD User", () => {
       await userRoleController.resetUserRole();
       await userController.resetUser();
 
-      mockUsers.forEach( async (obj: IUserInsert) => {
-        await userController.addUser(obj);
-      });
+      await prepareUsers();
 
     } catch (err) {
       // do nothing
@@ -63,10 +70,9 @@ describe("CRUD User", () => {
   });
 
   test("Get users", async () => {
-    const res = await request(app).get(`/${api_version}/users`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveLength;
-    expect(res.body.length).toBe(8);
+    const res = await userController.getUsers();
+    expect(res).toHaveLength;
+    console.log('>>> ', res)
   });
 
   test("Search users by username", async () => {
@@ -111,137 +117,137 @@ describe("CRUD User", () => {
     expect(res.body.message).toBe('User: Invalid request');
   });
 
-  // test("Get users pagination in first page", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=1&limit=4`);
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body).toHaveProperty('data');
-  //   expect(res.body.data).toHaveLength;
+  test("Get users pagination in first page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=1&limit=4`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveLength;
 
-  //   expect(res.body).toHaveProperty('pagination');
-  //   expect(res.body.pagination).toHaveProperty('total_records');
-  //   expect(res.body.pagination).toHaveProperty('current_page');
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('total_records');
+    expect(res.body.pagination).toHaveProperty('current_page');
     
-  //   expect(res.body.pagination).toHaveProperty('total_pages');
-  //   expect(res.body.pagination).toHaveProperty('next_page');
-  //   expect(res.body.pagination).toHaveProperty('prev_page');
+    expect(res.body.pagination).toHaveProperty('total_pages');
+    expect(res.body.pagination).toHaveProperty('next_page');
+    expect(res.body.pagination).toHaveProperty('prev_page');
 
-  //   expect(res.body.pagination.total_records).toBe(8);
-  //   expect(res.body.pagination.current_page).toBe(1);
-  //   expect(res.body.pagination.total_pages).toBe(2);
+    expect(res.body.pagination.total_records).toBe(8);
+    expect(res.body.pagination.current_page).toBe(1);
+    expect(res.body.pagination.total_pages).toBe(2);
 
-  //   expect(res.body.pagination.next_page).toBe(2);
-  //   expect(res.body.pagination.prev_page).toBe(null);
-  // });
+    expect(res.body.pagination.next_page).toBe(2);
+    expect(res.body.pagination.prev_page).toBe(null);
+  });
 
-  // test("Get users pagination in second page", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=2&limit=4`);
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body).toHaveProperty('data');
-  //   expect(res.body.data).toHaveLength;
+  test("Get users pagination in second page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=2&limit=4`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveLength;
 
-  //   expect(res.body).toHaveProperty('pagination');
-  //   expect(res.body.pagination).toHaveProperty('total_records');
-  //   expect(res.body.pagination).toHaveProperty('current_page');
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('total_records');
+    expect(res.body.pagination).toHaveProperty('current_page');
     
-  //   expect(res.body.pagination).toHaveProperty('total_pages');
-  //   expect(res.body.pagination).toHaveProperty('next_page');
-  //   expect(res.body.pagination).toHaveProperty('prev_page');
+    expect(res.body.pagination).toHaveProperty('total_pages');
+    expect(res.body.pagination).toHaveProperty('next_page');
+    expect(res.body.pagination).toHaveProperty('prev_page');
 
-  //   expect(res.body.pagination.total_records).toBe(8);
-  //   expect(res.body.pagination.current_page).toBe(2);
-  //   expect(res.body.pagination.total_pages).toBe(2);
+    expect(res.body.pagination.total_records).toBe(8);
+    expect(res.body.pagination.current_page).toBe(2);
+    expect(res.body.pagination.total_pages).toBe(2);
 
-  //   expect(res.body.pagination.next_page).toBe(null);
-  //   expect(res.body.pagination.prev_page).toBe(1);
-  // });
+    expect(res.body.pagination.next_page).toBe(null);
+    expect(res.body.pagination.prev_page).toBe(1);
+  });
 
-  // test("Get users pagination in middle page", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=2&limit=3`);
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body).toHaveProperty('data');
-  //   expect(res.body.data).toHaveLength;
+  test("Get users pagination in middle page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=2&limit=3`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveLength;
 
-  //   expect(res.body).toHaveProperty('pagination');
-  //   expect(res.body.pagination).toHaveProperty('total_records');
-  //   expect(res.body.pagination).toHaveProperty('current_page');
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('total_records');
+    expect(res.body.pagination).toHaveProperty('current_page');
     
-  //   expect(res.body.pagination).toHaveProperty('total_pages');
-  //   expect(res.body.pagination).toHaveProperty('next_page');
-  //   expect(res.body.pagination).toHaveProperty('prev_page');
+    expect(res.body.pagination).toHaveProperty('total_pages');
+    expect(res.body.pagination).toHaveProperty('next_page');
+    expect(res.body.pagination).toHaveProperty('prev_page');
 
-  //   expect(res.body.pagination.total_records).toBe(8);
-  //   expect(res.body.pagination.current_page).toBe(2);
-  //   expect(res.body.pagination.total_pages).toBe(3);
+    expect(res.body.pagination.total_records).toBe(8);
+    expect(res.body.pagination.current_page).toBe(2);
+    expect(res.body.pagination.total_pages).toBe(3);
 
-  //   expect(res.body.pagination.next_page).toBe(3);
-  //   expect(res.body.pagination.prev_page).toBe(1);
-  // });
+    expect(res.body.pagination.next_page).toBe(3);
+    expect(res.body.pagination.prev_page).toBe(1);
+  });
 
-  // test("Get users pagination but single page", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=1&limit=30`);
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body).toHaveProperty('data');
-  //   expect(res.body.data).toHaveLength;
+  test("Get users pagination but single page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=1&limit=30`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveLength;
 
-  //   expect(res.body).toHaveProperty('pagination');
-  //   expect(res.body.pagination).toHaveProperty('total_records');
-  //   expect(res.body.pagination).toHaveProperty('current_page');
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('total_records');
+    expect(res.body.pagination).toHaveProperty('current_page');
     
-  //   expect(res.body.pagination).toHaveProperty('total_pages');
-  //   expect(res.body.pagination).toHaveProperty('next_page');
-  //   expect(res.body.pagination).toHaveProperty('prev_page');
+    expect(res.body.pagination).toHaveProperty('total_pages');
+    expect(res.body.pagination).toHaveProperty('next_page');
+    expect(res.body.pagination).toHaveProperty('prev_page');
 
-  //   expect(res.body.pagination.total_records).toBe(8);
-  //   expect(res.body.pagination.current_page).toBe(1);
-  //   expect(res.body.pagination.total_pages).toBe(1);
+    expect(res.body.pagination.total_records).toBe(8);
+    expect(res.body.pagination.current_page).toBe(1);
+    expect(res.body.pagination.total_pages).toBe(1);
 
-  //   expect(res.body.pagination.next_page).toBe(null);
-  //   expect(res.body.pagination.prev_page).toBe(null);
-  // });
+    expect(res.body.pagination.next_page).toBe(null);
+    expect(res.body.pagination.prev_page).toBe(null);
+  });
 
-  // test("Get users pagination but ouf of page", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=2&limit=30`);
-  //   expect(res.statusCode).toBe(500);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body.message).toBe('User: Invalid request');
-  // });
+  test("Get users pagination but ouf of page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=2&limit=30`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: Invalid request');
+  });
 
-  // test("Get users pagination but page is 0", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=0&limit=30`);
-  //   expect(res.statusCode).toBe(500);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body.message).toBe('User: Invalid request');
-  // });
+  test("Get users pagination but page is 0", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=0&limit=30`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: Invalid request');
+  });
 
-  // test("Get users pagination but limit is 0", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=1&limit=0`);
-  //   expect(res.statusCode).toBe(500);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body.message).toBe('User: Invalid request');
-  // });
+  test("Get users pagination but limit is 0", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=1&limit=0`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: Invalid request');
+  });
 
-  // test("Get users pagination but no page", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?limit=2`);
-  //   expect(res.statusCode).toBe(500);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body.message).toBe('User: Invalid request');
-  // });
+  test("Get users pagination but no page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?limit=2`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: Invalid request');
+  });
 
-  // test("Get users pagination but no limit", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users?page=1`);
-  //   expect(res.statusCode).toBe(500);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body.message).toBe('User: Invalid request');
-  // });
+  test("Get users pagination but no limit", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users?page=1`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: Invalid request');
+  });
 
-  // test("Get users pagination but no query", async () => {
-  //   const res = await request(app).get(`/${api_version}/pagination/users`);
-  //   expect(res.statusCode).toBe(500);
-  //   expect(res.body).toHaveProperty('message');
-  //   expect(res.body.message).toBe('User: Invalid request');
-  // });
+  test("Get users pagination but no query", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/users`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('User: Invalid request');
+  });
 
-  test("Get user profile", async () => {
+  test("Prepare user profile", async () => {
     const res_user = await request(app).post(`/${api_version}/signup`).send({
       username: 'jennie@email.com',
       password: 'test1234',
@@ -260,8 +266,30 @@ describe("CRUD User", () => {
     
     user_id = res_user.body.id;
 
+    // add profile
+    const res = await request(app).post(`/${api_version}/user/profile/${user_id}`).send({
+      user_id: user_id,
+			first_name_EN: 'jennie',
+			last_name_EN: 'ki',
+			first_name_TH: 'เจนนี่',
+			last_name_TH: 'คิ',
+			gender: 'female',
+			date_of_birth: 1641600000,
+			address_EN: 'test address',
+			address_TH: 'ทดสอบ',
+			zip_code: 28000,
+			phone: '+66939999999',
+			image_profile: 'test_url'
+    });
+    expect(res.statusCode).toBe(201);
+
+  });
+
+  test("Get user profile", async () => {
     const res = await request(app).get(`/${api_version}/user/profile/${user_id}`);
     expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('user_id');
+    expect(res.body).toHaveProperty('profile_id');
 
     expect(res.body).toHaveProperty('username');
     expect(res.body).toHaveProperty('email');

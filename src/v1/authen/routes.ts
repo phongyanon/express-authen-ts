@@ -13,7 +13,8 @@ import {
   IStatusChangePassword,
   IResetPasswordByEmail,
   INewPassword,
-  IQueryVerifyEmail
+  IQueryVerifyEmail,
+  ITerminateUser
  } from "./authen.type";
 import { auth, checkRole, checkRoleUserAccess, checkRoleUserUpdate } from "../middleware/authen";
 import { Role } from "../utils/role";
@@ -37,6 +38,7 @@ router.post("/signin", async (req: Request, res: Response) => {
   let result: IResponse | ISignInResponse = await authen.signIn(signinUser);
   if (result.hasOwnProperty('error')){
     if (result.error === 'Invalid username or password') res.status(400).send(result);
+    else if (result.error === 'Inactive user') res.status(401).send(result);
     else res.status(500).send(result);
   }
   else res.status(200).send(result);
@@ -78,7 +80,8 @@ router.post("/auth/refresh/token", async (req: Request, res: Response) => {
   const refreshToken: IAuthRefreshToken = req.body;
   let result: IResponse | IAuthAccessTokenResp = await authen.authRefreshToken(refreshToken);
   if (result.hasOwnProperty('error')){
-    res.status(500).send(result);
+    if ((result as IResponse).error === 'Inactive user') res.status(401).send(result);
+    else res.status(500).send(result);
   }
   else res.status(200).send(result);
 });
@@ -87,7 +90,8 @@ router.post("/auth/refresh/tokens", async (req: Request, res: Response) => {
   const refreshToken: IAuthRefreshToken = req.body;
   let result: IResponse | IAuthRefreshTokenResp = await authen.authBothTokens(refreshToken);
   if (result.hasOwnProperty('error')){
-    res.status(500).send(result);
+    if ((result as IResponse).error === 'Inactive user') res.status(401).send(result);
+    else res.status(500).send(result);
   }
   else res.status(200).send(result);
 });
@@ -155,6 +159,14 @@ router.post("/revoke/token/:user_id", auth, checkRole([Role.SuperAdmin, Role.Adm
   if (result.hasOwnProperty('error')){
     res.status(500).send(result);
   }
+  else res.status(200).send(result);
+});
+
+router.post("/user/terminate", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserUpdate, async (req: Request, res: Response) => {
+  const body: ITerminateUser = req.body;
+  let result: IResponse | ISuccessResponse = await authen.terminateUser(body.user_id);
+  
+  if (result.hasOwnProperty('error')) res.status(500).send(result);
   else res.status(200).send(result);
 });
 

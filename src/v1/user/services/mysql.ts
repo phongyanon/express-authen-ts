@@ -138,6 +138,19 @@ export class Query {
 		});
 	}
 
+	searchUser(name: string, limit: number){
+		return new Promise( resolve => {
+			let keyword: string = `%${name}%`
+			this.con.execute<RowDataPacket[]>("SELECT * FROM User WHERE username LIKE ? LIMIT ?;", [keyword, limit.toString()],
+				(err, rows) => {
+					if (err) resolve({error: err.toString(), message: 'User: Invalid request'});
+					else {
+						resolve(rows);
+					}
+			});
+		});
+	}
+
 	addUser(ctx: IUserInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO User ( \

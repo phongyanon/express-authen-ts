@@ -143,6 +143,116 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IUserProfileInfo": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"profile_id": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"is_sso_user": {
+						"type": "boolean"
+					},
+					"sso_user_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"sso_from": {
+						"type": "string",
+						"nullable": true
+					},
+					"status": {
+						"type": "string"
+					},
+					"first_name_EN": {
+						"type": "string"
+					},
+					"last_name_EN": {
+						"type": "string"
+					},
+					"first_name_TH": {
+						"type": "string",
+						"nullable": true
+					},
+					"last_name_TH": {
+						"type": "string",
+						"nullable": true
+					},
+					"gender": {
+						"type": "string"
+					},
+					"date_of_birth": {
+						"type": "number",
+						"format": "double"
+					},
+					"address_EN": {
+						"type": "string",
+						"nullable": true
+					},
+					"address_TH": {
+						"type": "string",
+						"nullable": true
+					},
+					"zip_code": {
+						"type": "number",
+						"format": "double"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"image_profile": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"user_id",
+					"profile_id",
+					"username",
+					"email",
+					"is_sso_user",
+					"sso_user_id",
+					"sso_from",
+					"status",
+					"first_name_EN",
+					"last_name_EN",
+					"first_name_TH",
+					"last_name_TH",
+					"gender",
+					"date_of_birth",
+					"address_EN",
+					"address_TH",
+					"zip_code",
+					"phone",
+					"image_profile"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ISearchUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"limit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ISuccessResponse": {
 				"properties": {
 					"error": {
@@ -1452,6 +1562,130 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/user/profile/{id}": {
+			"get": {
+				"operationId": "GetUserProfileByUserId",
+				"responses": {
+					"200": {
+						"description": "Get user profile by user_id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IUserProfileInfo"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"user_id": "3",
+											"profile_id": "4",
+											"username": "test2",
+											"email": "john2@email.com",
+											"is_sso_user": false,
+											"sso_user_id": null,
+											"sso_from": null,
+											"status": "active",
+											"first_name_EN": "test",
+											"last_name_EN": "test",
+											"first_name_TH": "test",
+											"last_name_TH": "test",
+											"gender": "male",
+											"date_of_birth": 1699516723,
+											"address_EN": "test",
+											"address_TH": "test",
+											"zip_code": 29000,
+											"phone": "+66939999999",
+											"image_profile": "https://image_profile_url.test"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/users/search": {
+			"get": {
+				"operationId": "SearchUser",
+				"responses": {
+					"200": {
+						"description": "Search user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/IUser"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"id": "3",
+												"username": "test2",
+												"password": "test1234",
+												"password_salt": "test",
+												"email": "john2@email.com",
+												"is_sso_user": false,
+												"sso_user_id": null,
+												"sso_from": null,
+												"status": "active"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "name",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					},
 					{

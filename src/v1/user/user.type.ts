@@ -78,3 +78,8 @@ export interface IUserProfileInfo {
   phone: string
   image_profile: string | null
 }
+
+export interface ISearchUser {
+  name: string
+  limit: number
+}

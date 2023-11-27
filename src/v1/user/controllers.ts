@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Query as MysqlQuery } from './services/mysql';
 import { Query as MongoQuery } from './services/mongo';
-import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp, IUserProfileInfo } from './user.type';
+import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp, IUserProfileInfo, ISearchUser } from './user.type';
 import { IResponse, ISuccessResponse } from "../utils/common.type";
 import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Queries } from "tsoa";
 
@@ -148,6 +148,29 @@ export class Controller {
 		return new Promise( async resolve => {
 			let result = await this.query.getUserProfileByUserId(id);
 			resolve(result);
+		});
+	}
+
+	@Get("/users/search")
+	@SuccessResponse("200", "Search user")
+	@Example<IUser[]>([{
+		"id": "3",
+    "username": "test2",
+    "password": "test1234",
+    "password_salt": "test",
+    "email": "john2@email.com",
+    "is_sso_user": false,
+    "sso_user_id": null,
+    "sso_from": null,
+    "status": "active",
+  }])
+	searchUser(@Queries() query: ISearchUser): Promise<IResponse | IUser[]>{
+		return new Promise( async resolve => {
+			if ((query.name === '')||(query.limit === 0)) resolve({error: true, message: 'User: Invalid request'});
+			else {
+				let result = await this.query.searchUser(query.name, query.limit);
+				resolve(result);
+			}
 		});
 	}
 

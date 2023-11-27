@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
-import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp, IUserProfileInfo } from "./user.type";
+import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp, IUserProfileInfo, ISearchUser } from "./user.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
-import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
+import { auth, checkRole, checkRoleUserAccess, checkRoleUserUpdate } from "../middleware/authen";
 import { Role, isSingleRole } from "../utils/role";
 
 const router = Router();
@@ -78,6 +78,16 @@ router.get("/user/profile/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Ro
     if (result.hasOwnProperty('message')) res.status(404).send(result);
     else res.status(500).send(result);
   }
+  else res.status(200).send(result);
+});
+
+router.get("/users/search", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
+  const query: ISearchUser = {
+    name: req.query?.name  === undefined ? '' : req.query.name.toString(),
+    limit: req.query?.limit  === undefined ? 0 : parseInt(req.query.limit as string)
+  };
+  let result: IResponse | IUser[] = await user.searchUser(query);
+  if (result.hasOwnProperty('error')) res.status(500).send(result);
   else res.status(200).send(result);
 });
 
