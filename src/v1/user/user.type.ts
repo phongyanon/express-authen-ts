@@ -56,3 +56,25 @@ export interface IPaginationUserResp {
   data: IUser[]
   pagination: IPaginationInfo
 }
+
+export interface IUserProfileInfo {
+  user_id: string
+  profile_id: string
+  username: string
+  email: string
+  is_sso_user: boolean
+  sso_user_id: string | null
+  sso_from: string | null
+  status: string
+  first_name_EN: string
+  last_name_EN: string
+  first_name_TH: string | null
+  last_name_TH: string | null
+  gender: string
+  date_of_birth: number
+  address_EN: string | null
+  address_TH: string | null
+  zip_code: number
+  phone: string
+  image_profile: string | null
+}

@@ -99,6 +99,45 @@ export class Query {
 		});
 	}
 
+	getUserProfileByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT \
+					User.id as user_id, \
+					Profile.id as profile_id, \
+					User.username, \
+  				User.email, \
+  				User.is_sso_user, \
+  				User.sso_user_id, \
+  				User.sso_from, \
+  				User.status, \
+					Profile.first_name_EN, \
+  				Profile.last_name_EN, \
+  				Profile.first_name_TH, \
+  				Profile.last_name_TH, \
+  				Profile.gender, \
+  				Profile.date_of_birth, \
+  				Profile.address_EN, \
+  				Profile.address_TH, \
+  				Profile.zip_code, \
+  				Profile.phone, \
+  				Profile.image_profile \
+					 FROM User \
+					 INNER JOIN Profile ON User.id=Profile.user_id WHERE Profile.user_id=?;', [user_id],
+				(err, row) => {
+					if (err) resolve({error: err.toString(), message: 'User: Invalid request'});
+					else {
+						if (row.length === 0) resolve({error: true, message: 'User: item does not exist'});
+						else {
+							row[0].user_id = row[0].user_id.toString();
+							row[0].profile_id = row[0].profile_id.toString();
+							row[0].date_of_birth = row[0].date_of_birth.valueOf();
+							resolve(row[0]);
+						}
+					}
+			});
+		});
+	}
+
 	addUser(ctx: IUserInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO User ( \

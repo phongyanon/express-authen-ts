@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Query as MysqlQuery } from './services/mysql';
 import { Query as MongoQuery } from './services/mongo';
-import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp } from './user.type';
+import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp, IUserProfileInfo } from './user.type';
 import { IResponse, ISuccessResponse } from "../utils/common.type";
 import { Get, Post, Put, Delete, Route, SuccessResponse, Example, Path, Body, Queries } from "tsoa";
 
@@ -118,6 +118,36 @@ export class Controller {
 
 				}
 			}
+		});
+	}
+
+	@Get("/user/profile/{id}")
+	@SuccessResponse("200", "Get user profile by user_id")
+	@Example<IUserProfileInfo>({
+		"user_id": "3",
+		"profile_id": "4",
+    "username": "test2",
+    "email": "john2@email.com",
+    "is_sso_user": false,
+    "sso_user_id": null,
+    "sso_from": null,
+    "status": "active",
+		"first_name_EN": "test",
+		"last_name_EN": "test",
+		"first_name_TH": "test",
+		"last_name_TH": "test",
+		"gender": "male",
+		"date_of_birth": 1699516723,
+		"address_EN": "test",
+		"address_TH": "test",
+		"zip_code": 29000,
+		"phone": "+66939999999",
+		"image_profile": "https://image_profile_url.test"
+  })
+	getUserProfileByUserId(@Path() id: string): Promise<IResponse | IUserProfileInfo>{
+		return new Promise( async resolve => {
+			let result = await this.query.getUserProfileByUserId(id);
+			resolve(result);
 		});
 	}
 
