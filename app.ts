@@ -28,6 +28,7 @@ const corsOptions: cors.CorsOptions = {
     'Content-Type',
     'Accept',
     'X-Access-Token',
+    'Authorization',
   ],
 }
 

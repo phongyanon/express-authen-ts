@@ -11,7 +11,13 @@ let user = new Controller();
 router.get("/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
   let result: IResponse | IUser[] = await user.getUsers();
   if (result.hasOwnProperty('error')) res.status(500).send(result);
-  else res.status(200).send(result);
+  else {
+    res.status(200).send((result as IUser[]).map((user: IUser) => {
+      user.password = '***';
+      user.password_salt = '***';
+      return user;
+    }));
+  }
 });
 
 router.get("/user/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
@@ -22,7 +28,11 @@ router.get("/user/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.
     if (result.hasOwnProperty('message')) res.status(404).send(result);
     else res.status(500).send(result);
   }
-  else res.status(200).send(result);
+  else {
+    (result as IUser).password = '***';
+    (result as IUser).password_salt = '***';
+    res.status(200).send(result);
+  }
 });
 
 router.post("/user", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {

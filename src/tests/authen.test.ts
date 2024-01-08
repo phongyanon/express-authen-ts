@@ -388,6 +388,15 @@ describe("Authentication", () => {
   //   expect(res.body.message).toBe('success');
   // });
 
+  test("View User's roles", async () => {
+    const res = await request(app)
+      .get(`/${api_version}/role/user/${user_id}`)
+      .set('Authorization', `Bearer ${result_access_token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('User');
+  });
+
   test("Role User access", async () => {
     const res = await request(app)
       .get(`/${api_version}/test/role/user`)

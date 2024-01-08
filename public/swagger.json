@@ -2720,6 +2720,49 @@
 				]
 			}
 		},
+		"/v1/user/terminate": {
+			"post": {
+				"operationId": "TerminateUser",
+				"responses": {
+					"200": {
+						"description": "Terminate user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ISuccessResponse"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/upload/profile/image/{user_id}": {
 			"post": {
 				"operationId": "UploadToGoogleDrive",
