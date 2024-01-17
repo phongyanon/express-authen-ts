@@ -80,7 +80,7 @@ router.get("/pagination/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), 
 });
 
 
-router.get("/user/profile/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
+router.get("/user/data/profile/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
   const id: string = (req.params.id).toString();
   let result: IResponse | IUserProfileInfo = await user.getUserProfileByUserId(id);
   

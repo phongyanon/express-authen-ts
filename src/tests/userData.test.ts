@@ -286,7 +286,7 @@ describe("CRUD User", () => {
   });
 
   test("Get user profile", async () => {
-    const res = await request(app).get(`/${api_version}/user/profile/${user_id}`);
+    const res = await request(app).get(`/${api_version}/user/data/profile/${user_id}`);
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('user_id');
     expect(res.body).toHaveProperty('profile_id');
@@ -315,7 +315,7 @@ describe("CRUD User", () => {
   });
 
   test("Get user profile but not found", async () => {
-    const res = await request(app).get(`/${api_version}/user/profile/9999999`);
+    const res = await request(app).get(`/${api_version}/user/data/profile/9999999`);
     expect(res.statusCode).toBe(404);
 
     expect(res.body).toHaveProperty('message');
