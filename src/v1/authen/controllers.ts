@@ -336,16 +336,16 @@ export class Controller {
 							resolve({message: 'success'});
 						} else {
 							// send reset_password_link to email
-							let reset_password_link: string = `127.0.0.1:8000/v1/reset/password/?user_id=${user_email.id}&token=${reset_token}`;
+							let reset_password_link: string = `http://localhost:3000/password/new?user_id=${user_email.id}&token=${reset_token}`;
 							let send_mail_result: ISendMailResp = await sendMail({
 								email_to: user_email.email,
 								subject: `Reset password from my auth platform to ${user_email.email}`,
 								text: `
 									<h1>Reset password</h1>
 									<p>Your reset password link: ${reset_password_link}</p><br/>
-									<button type="submit" formmethod="get">
-										<a href="${reset_password_link}">Click here to reset password</a>
-									</button>
+									<a href="${reset_password_link}" target="_blank" rel="noopener">
+										<button>Click here to reset password</button>
+      						</a>
 									`
 							});
 							
