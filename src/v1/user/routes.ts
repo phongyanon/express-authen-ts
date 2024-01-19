@@ -76,7 +76,14 @@ router.get("/pagination/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), 
   let result: IResponse | IPaginationUserResp = await user.getUserPagination(query);
   
   if (result.hasOwnProperty('error')) res.status(500).send(result);
-  else res.status(200).send(result);
+  else {
+    (result as IPaginationUserResp).data = ((result as IPaginationUserResp).data as IUser[]).map((user: IUser) => {
+      user.password = '***';
+      user.password_salt = '***';
+      return user;
+    });
+    res.status(200).send(result);
+  }
 });
 
 
