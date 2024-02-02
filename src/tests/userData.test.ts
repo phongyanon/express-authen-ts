@@ -6,6 +6,7 @@ import { Controller as ProfileController } from "../v1/profile/controllers";
 import { Controller as UserRoleController } from "../v1/userRole/controllers";
 import { Controller as UserController } from "../v1/user/controllers";
 import { mockUsers } from "./mockUsers";
+import { IProfileInsert } from "./profile.test";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -43,7 +44,21 @@ interface IUserResponse {
 const prepareUsers = () => {
   return new Promise(async resolve => {
     mockUsers.forEach( async (obj: IUserInsert) => {
-      await userController.addUser(obj);
+      let add_res: any = await userController.addUser(obj);
+      await profileController.addProfile({
+        user_id: add_res.id,
+        first_name_EN: `Firstname${add_res.id}`,
+        last_name_EN: `Lastname${add_res.id}`,
+        first_name_TH: `คน${add_res.id}`,
+        last_name_TH: `สวย${add_res.id}`,
+        gender: 'female',
+        date_of_birth: 1699516723,
+        address_EN: 'home',
+        address_TH: 'บ้าน',
+        zip_code: 23000,
+        phone: "+66939999999",
+        image_profile: 'test'
+      });
     });
     resolve(true)
   });
@@ -245,6 +260,70 @@ describe("CRUD User", () => {
     expect(res.statusCode).toBe(500);
     expect(res.body).toHaveProperty('message');
     expect(res.body.message).toBe('User: Invalid request');
+  });
+
+  test("Get profiles pagination in first page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles?page=1&limit=4`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveLength;
+
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('total_records');
+    expect(res.body.pagination).toHaveProperty('current_page');
+    
+    expect(res.body.pagination).toHaveProperty('total_pages');
+    expect(res.body.pagination).toHaveProperty('next_page');
+    expect(res.body.pagination).toHaveProperty('prev_page');
+
+    expect(res.body.pagination.total_records).toBe(8);
+    expect(res.body.pagination.current_page).toBe(1);
+    expect(res.body.pagination.total_pages).toBe(2);
+
+    expect(res.body.pagination.next_page).toBe(2);
+    expect(res.body.pagination.prev_page).toBe(null);
+  });
+
+  test("Get profiles pagination but ouf of page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles?page=2&limit=30`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Profile: Invalid request');
+  });
+
+  test("Get profiles pagination but page is 0", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles?page=0&limit=30`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Profile: Invalid request');
+  });
+
+  test("Get profiles pagination but limit is 0", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles?page=1&limit=0`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Profile: Invalid request');
+  });
+
+  test("Get profiles pagination but no page", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles?limit=2`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Profile: Invalid request');
+  });
+
+  test("Get profiles pagination but no limit", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles?page=1`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Profile: Invalid request');
+  });
+
+  test("Get profiles pagination but no query", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/profiles`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Profile: Invalid request');
   });
 
   test("Prepare user profile", async () => {

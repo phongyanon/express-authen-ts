@@ -71,6 +71,59 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IUserWithRoles": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password_salt": {
+						"type": "string"
+					},
+					"is_sso_user": {
+						"type": "boolean"
+					},
+					"sso_user_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"sso_from": {
+						"type": "string",
+						"nullable": true
+					},
+					"status": {
+						"type": "string"
+					},
+					"roles": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"password",
+					"email",
+					"password_salt",
+					"is_sso_user",
+					"sso_user_id",
+					"sso_from",
+					"status",
+					"roles"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IPaginationInfo": {
 				"properties": {
 					"total_records": {
@@ -110,7 +163,7 @@
 				"properties": {
 					"data": {
 						"items": {
-							"$ref": "#/components/schemas/IUser"
+							"$ref": "#/components/schemas/IUserWithRoles"
 						},
 						"type": "array"
 					},
@@ -232,6 +285,25 @@
 					"zip_code",
 					"phone",
 					"image_profile"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaginationProfileResp": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IUserProfileInfo"
+						},
+						"type": "array"
+					},
+					"pagination": {
+						"$ref": "#/components/schemas/IPaginationInfo"
+					}
+				},
+				"required": [
+					"data",
+					"pagination"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1536,7 +1608,91 @@
 													"is_sso_user": false,
 													"sso_user_id": null,
 													"sso_from": null,
-													"status": "active"
+													"status": "active",
+													"roles": [
+														"User"
+													]
+												}
+											],
+											"pagination": {
+												"total_records": 8,
+												"current_page": 1,
+												"total_pages": 3,
+												"next_page": 2,
+												"prev_page": null
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/pagination/profiles": {
+			"get": {
+				"operationId": "GetUserProfilePagination",
+				"responses": {
+					"200": {
+						"description": "Get users profiles pagination",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IPaginationProfileResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"data": [
+												{
+													"user_id": "3",
+													"profile_id": "4",
+													"username": "test2",
+													"email": "john2@email.com",
+													"is_sso_user": false,
+													"sso_user_id": null,
+													"sso_from": null,
+													"status": "active",
+													"first_name_EN": "test",
+													"last_name_EN": "test",
+													"first_name_TH": "test",
+													"last_name_TH": "test",
+													"gender": "male",
+													"date_of_birth": 1699516723,
+													"address_EN": "test",
+													"address_TH": "test",
+													"zip_code": 29000,
+													"phone": "+66939999999",
+													"image_profile": "https://image_profile_url.test"
 												}
 											],
 											"pagination": {

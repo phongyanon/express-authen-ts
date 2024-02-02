@@ -39,6 +39,10 @@ export interface IUser {
   status: string
 }
 
+export interface IUserWithRoles extends IUser {
+  roles: string[]
+}
+
 export interface IPaginationUser {
   page: number
   limit: number
@@ -53,7 +57,7 @@ interface IPaginationInfo {
 }
 
 export interface IPaginationUserResp {
-  data: IUser[]
+  data: IUserWithRoles[]
   pagination: IPaginationInfo
 }
 
@@ -82,4 +86,9 @@ export interface IUserProfileInfo {
 export interface ISearchUser {
   name: string
   limit: number
+}
+
+export interface IPaginationProfileResp {
+  data: IUserProfileInfo[]
+  pagination: IPaginationInfo
 }

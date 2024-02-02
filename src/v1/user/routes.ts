@@ -1,6 +1,16 @@
 import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
-import { IUserInsert, IUserUpdate, IUser, IPaginationUser, IPaginationUserResp, IUserProfileInfo, ISearchUser } from "./user.type";
+import { 
+  IUserInsert, 
+  IUserUpdate, 
+  IUser, 
+  IPaginationUser, 
+  IPaginationUserResp, 
+  IUserProfileInfo, 
+  ISearchUser, 
+  IPaginationProfileResp,
+  IUserWithRoles
+} from "./user.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
 import { auth, checkRole, checkRoleUserAccess, checkRoleUserUpdate } from "../middleware/authen";
 import { Role, isSingleRole } from "../utils/role";
@@ -77,7 +87,7 @@ router.get("/pagination/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), 
   
   if (result.hasOwnProperty('error')) res.status(500).send(result);
   else {
-    (result as IPaginationUserResp).data = ((result as IPaginationUserResp).data as IUser[]).map((user: IUser) => {
+    (result as IPaginationUserResp).data = ((result as IPaginationUserResp).data as IUserWithRoles[]).map((user: IUserWithRoles) => {
       user.password = '***';
       user.password_salt = '***';
       return user;
@@ -86,6 +96,18 @@ router.get("/pagination/users", auth, checkRole([Role.SuperAdmin, Role.Admin]), 
   }
 });
 
+router.get("/pagination/profiles", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
+  const query: IPaginationUser = {
+    page: req.query?.page === undefined ? 0 : parseInt(req.query.page as string),
+    limit: req.query?.limit  === undefined ? 0 : parseInt(req.query.limit as string)
+  };
+  let result: IResponse | IPaginationProfileResp = await user.getUserProfilePagination(query);
+  
+  if (result.hasOwnProperty('error')) res.status(500).send(result);
+  else {
+    res.status(200).send(result);
+  }
+});
 
 router.get("/user/data/profile/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
   const id: string = (req.params.id).toString();

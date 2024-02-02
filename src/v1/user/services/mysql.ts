@@ -73,7 +73,7 @@ export class Query {
 
 	getUserPagination(limit: number, offset: number){
 		return new Promise( resolve => {
-			this.con.execute<RowDataPacket[]>('SELECT * FROM User ORDER BY username, id LIMIT ? OFFSET ?;', [limit.toString(), offset.toString()], 
+			this.con.execute<RowDataPacket[]>('SELECT * FROM User	ORDER BY User.username, User.id LIMIT ? OFFSET ?;', [limit.toString(), offset.toString()], 
 				(err, rows) => {
 					if (err) resolve({error: err.toString(), message: 'User: Invalid request'});
 					else {
@@ -89,11 +89,61 @@ export class Query {
 		});
 	}
 
+	getUserProfilePagination(limit: number, offset: number){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT \
+				Profile.id as profile_id, \
+				Profile.user_id as user_id, \
+				Profile.first_name_EN, \
+				Profile.last_name_EN, \
+				Profile.first_name_TH, \
+				Profile.last_name_TH, \
+				Profile.gender, \
+				Profile.date_of_birth, \
+				Profile.address_EN, \
+				Profile.address_TH, \
+				Profile.zip_code, \
+				Profile.phone, \
+				Profile.image_profile, \
+				User.username, \
+				User.email \
+				FROM User INNER JOIN Profile ON Profile.user_id = User.id ORDER BY User.username, User.id LIMIT ? OFFSET ?;'
+				, [limit.toString(), offset.toString()], 
+				(err, rows) => {
+					if (err) resolve({error: err.toString(), message: 'Profile: Invalid request'});
+					else {
+						if (rows.length === 0) resolve({error: true, message: 'Profile: Invalid request'});
+						else {
+							resolve(rows.map( row => {
+								row.user_id = row.user_id.toString();
+								row.profile_id = row.profile_id.toString();
+								row.date_of_birth = row.date_of_birth.valueOf();
+								row.is_sso_user = row.is_sso_user === 0 ? false: true;
+								return row;
+							}));
+						}
+					}
+			});
+		});
+	}
+
 	getUserCount(){
 		return new Promise( resolve => {
-			this.con.execute<RowDataPacket[]>('SELECT COUNT(id) AS userCount FROM User;',
+			this.con.execute<RowDataPacket[]>('SELECT COUNT(id) AS recordCount FROM User;',
 				(err, row) => {
 					if (err) resolve({error: err.toString(), message: 'User: Invalid request'});
+					else {
+						resolve(row[0]);
+					}
+			});
+		});
+	}
+
+	getProfileCount(){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT COUNT(id) AS recordCount FROM Profile;',
+				(err, row) => {
+					if (err) resolve({error: err.toString(), message: 'Profile: Invalid request'});
 					else {
 						resolve(row[0]);
 					}
