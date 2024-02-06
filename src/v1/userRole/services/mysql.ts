@@ -43,6 +43,26 @@ export class Query {
 		});
 	}
 
+	getUserRoleByUserId(user_id: string){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT * FROM UserRole WHERE user_id = ?;', [user_id], 
+				(err, rows) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						if (rows.length === 0) resolve({error: true, message: 'UserRole: item does not exist'});
+						else {
+							resolve(rows.map( row => {
+								row.user_id = row.user_id.toString();
+								row.role_id = row.role_id.toString();
+	
+								return row;
+							}));
+						}
+					}
+			});
+		});
+	}
+
 	addUserRole(ctx: IUserRoleInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO UserRole ( \

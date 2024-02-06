@@ -9,7 +9,7 @@
     "dev:server": "nodemon --watch './**/*.ts' --exec 'ts-node' server.ts",
     "dev": "NODE_ENV=development ts-node server.ts",
     "test": "NODE_ENV=test jest --runInBand",
-    "test:api": "NODE_ENV=test NO_AUTH=1 jest --runInBand src/tests/userData.test.ts",
+    "test:api": "NODE_ENV=test NO_AUTH=1 jest --runInBand src/tests/userRole.test.ts",
     "test:authen": "NODE_ENV=test jest --runInBand src/tests/authen.test.ts",
     "test:role": "NODE_ENV=test jest --runInBand src/tests/testRole.test.ts",
     "migrate:mysql": "NODE_ENV=development ts-node src/db_migration/mysql.ts",

@@ -3,11 +3,15 @@ import app from "../../app";
 import { Controller as RoleController } from "../v1/role/controllers";
 import { Controller as UserController } from "../v1/user/controllers";
 import { Controller as UserRoleController } from "../v1/userRole/controllers";
+import { Controller as ProfileController } from "../v1/profile/controllers";
+import { Controller as VerificationController } from "../v1/verification/controllers";
 import dotenv from 'dotenv';
 
 dotenv.config();
 const api_version = process.env.API_VERSION;
 let roleController = new RoleController();
+let profileController = new ProfileController();
+let verificationController = new VerificationController();
 let userController = new UserController();
 let userRoleController = new UserRoleController();
 
@@ -58,6 +62,8 @@ describe("CRUD UserRole", () => {
 
   beforeAll( async () => {
     try {
+			await profileController.resetProfile();
+      await verificationController.resetVerification();
 			await userRoleController.resetUserRole();
       await roleController.resetRole();
 			await userController.resetUser();
@@ -124,6 +130,16 @@ describe("CRUD UserRole", () => {
     expect(isIUserRoleResponse(res.body)).toBe(true);
     expect(res.body.user_id).toBe(test_userRoles[0].user_id.toString());
 		expect(res.body.role_id).toBe(test_userRoles[0].role_id.toString());
+  });
+
+  test("Get userRole by user_id", async () => {
+    const res = await request(app).get(`/${api_version}/userRole/user/${test_userRoles[0].user_id}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveLength;
+    expect(res.body.length).toBe(1);
+    expect(isIUserRoleResponse(res.body[0])).toBe(true);
+    expect(res.body[0].user_id).toBe(test_userRoles[0].user_id.toString());
+		expect(res.body[0].role_id).toBe(test_userRoles[0].role_id.toString());
   });
 
   test("Update userRole", async () => {

@@ -3495,6 +3495,52 @@
 				]
 			}
 		},
+		"/v1/role/user/{user_id}": {
+			"get": {
+				"operationId": "GetRolesByUserId",
+				"responses": {
+					"200": {
+						"description": "Get user's roles",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											"Admin",
+											"User"
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/role": {
 			"post": {
 				"operationId": "AddRole",
@@ -4180,6 +4226,55 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/userRole/user/{user_id}": {
+			"get": {
+				"operationId": "GetUserRoleByUserId",
+				"responses": {
+					"200": {
+						"description": "Get userRole by user_id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/IUserRole"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"id": "5",
+												"user_id": "test",
+												"role_id": "test"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "user_id",
 						"required": true,
 						"schema": {
 							"type": "string"

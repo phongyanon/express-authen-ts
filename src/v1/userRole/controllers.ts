@@ -52,6 +52,20 @@ export class Controller {
 		});
 	}
 
+	@Get("userRole/user/{user_id}")
+	@SuccessResponse("200", "Get userRole by user_id")
+	@Example<IUserRole[]>([{
+		id: '5',
+		user_id: 'test',
+		role_id: 'test'
+  }])
+	getUserRoleByUserId(@Path() user_id: string): Promise<IResponse | IUserRole[]>{
+		return new Promise( async resolve => {
+			let result = await this.query.getUserRoleByUserId(user_id);
+			resolve(result);
+		});
+	}
+
 	@Post("userRole")
   @SuccessResponse("201", "Created")
 	@Example<ISuccessResponse>({

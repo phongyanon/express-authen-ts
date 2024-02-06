@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
 import { IUserRoleInsert, IUserRoleUpdate, IUserRole } from "./uesrRole.type";
 import { IResponse, ISuccessResponse } from "../utils/common.type";
-import { auth, checkRole } from "../middleware/authen";
+import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role } from "../utils/role";
 
 const router = Router();
@@ -47,6 +47,17 @@ router.put("/userRole/:id", auth, checkRole([Role.SuperAdmin]), async (req: Requ
 router.delete("/userRole/:id", auth, checkRole([Role.SuperAdmin]), async (req: Request, res: Response) => {
   const id: string = (req.params.id).toString();
   let result: IResponse | ISuccessResponse = await userRole.deleteUserRole(id);
+  
+  if (result.hasOwnProperty('error')) {
+    if (result.hasOwnProperty('message')) res.status(404).send(result);
+    else res.status(500).send(result);
+  }
+  else res.status(200).send(result);
+});
+
+router.get("/userRole/user/:user_id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User]), checkRoleUserAccess, async (req: Request, res: Response) => {
+  const user_id: string = (req.params.user_id).toString();
+  let result: IResponse | IUserRole[] = await userRole.getUserRoleByUserId(user_id);
   
   if (result.hasOwnProperty('error')) {
     if (result.hasOwnProperty('message')) res.status(404).send(result);

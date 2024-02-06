@@ -50,6 +50,9 @@ export class Controller {
 		});
 	}
 
+	@Get("role/user/{user_id}")
+	@SuccessResponse("200", "Get user's roles")
+	@Example<string[]>(['Admin', 'User'])
 	getRolesByUserId(user_id: string): Promise<IResponse | string[]>{
 		return new Promise( async resolve => {
 			let result = await this.query.getRolesByUserId(user_id);
