@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
-import { IVerificationInsert, IVerificationUpdate, IVerification } from "./verification.type";
-import { IResponse, ISuccessResponse } from "../utils/common.type";
+import { IVerificationInsert, IVerificationUpdate, IVerification, IPaginationVerificationResp } from "./verification.type";
+import { IResponse, ISuccessResponse, IPagination } from "../utils/common.type";
 import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role } from "../utils/role";
 
@@ -34,6 +34,19 @@ router.get("/user/verification/:user_id", auth, checkRole([Role.SuperAdmin, Role
     else res.status(500).send(result);
   }
   else res.status(200).send(result);
+});
+
+router.get("/pagination/verifications", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
+  const query: IPagination = {
+    page: req.query?.page === undefined ? 0 : parseInt(req.query.page as string),
+    limit: req.query?.limit  === undefined ? 0 : parseInt(req.query.limit as string)
+  };
+  let result: IResponse | IPaginationVerificationResp = await verification.getVerificationPagination(query);
+  
+  if (result.hasOwnProperty('error')) res.status(500).send(result);
+  else {
+    res.status(200).send(result);
+  }
 });
 
 router.post("/verification", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {

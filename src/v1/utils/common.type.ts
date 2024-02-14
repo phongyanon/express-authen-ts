@@ -34,3 +34,8 @@ export interface IUploadFileResp {
     message: string
     data?: any
 }
+
+export interface IPagination {
+	page: number
+	limit: number
+}

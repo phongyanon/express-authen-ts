@@ -482,6 +482,106 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IVerificationInfo": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"user_id": {
+						"type": "string"
+					},
+					"reset_password_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"reset_password_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"verify_email_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"verify_email_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"email_verified": {
+						"type": "boolean"
+					},
+					"enable_opt": {
+						"type": "boolean"
+					},
+					"otp_secret": {
+						"type": "string",
+						"nullable": true
+					},
+					"otp_verified": {
+						"type": "boolean"
+					},
+					"token_salt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"user_id",
+					"reset_password_token",
+					"reset_password_token_expires_at",
+					"verify_email_token",
+					"verify_email_token_expires_at",
+					"email_verified",
+					"enable_opt",
+					"otp_secret",
+					"otp_verified",
+					"token_salt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaginationVerificationResp": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IVerificationInfo"
+						},
+						"type": "array"
+					},
+					"pagination": {
+						"$ref": "#/components/schemas/IPaginationInfo"
+					}
+				},
+				"required": [
+					"data",
+					"pagination"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPagination": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"page",
+					"limit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IVerificationInsert": {
 				"properties": {
 					"user_id": {
@@ -2130,6 +2230,80 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/pagination/verifications": {
+			"get": {
+				"operationId": "GetVerificationPagination",
+				"responses": {
+					"200": {
+						"description": "Get verifications pagination",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IPaginationVerificationResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"data": [
+												{
+													"id": "5",
+													"user_id": "test",
+													"username": "test12",
+													"reset_password_token": "reset_password_token",
+													"reset_password_token_expires_at": 1660926192826,
+													"verify_email_token": "email_token",
+													"verify_email_token_expires_at": 1660926192826,
+													"email_verified": false,
+													"enable_opt": false,
+													"otp_secret": "secret",
+													"otp_verified": false,
+													"token_salt": "salt"
+												}
+											],
+											"pagination": {
+												"total_records": 8,
+												"current_page": 1,
+												"total_pages": 3,
+												"next_page": 2,
+												"prev_page": null
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]

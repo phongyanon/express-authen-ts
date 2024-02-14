@@ -76,6 +76,42 @@ export class Query {
 		});
 	}
 
+	getVerificationPagination(limit: number, offset: number){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT \
+				User.username, \
+				Verification.id, \
+				Verification.user_id, \
+				Verification.reset_password_token, \
+				Verification.reset_password_token_expires_at, \
+				Verification.verify_email_token, \
+				Verification.verify_email_token_expires_at, \
+				Verification.email_verified, \
+				Verification.enable_opt, \
+				Verification.otp_secret, \
+				Verification.otp_verified, \
+				Verification.token_salt \
+				FROM Verification INNER JOIN User ON Verification.user_id = User.id ORDER BY User.username, User.id LIMIT ? OFFSET ?;'
+				, [limit.toString(), offset.toString()],
+				(err, rows) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						resolve(rows.map( row => {
+							row.email_verified = row.email_verified === 0 ? false: true;
+							row.enable_opt = row.enable_opt === 0 ? false: true;
+							row.otp_verified = row.otp_verified === 0 ? false: true;
+							row.user_id = row.user_id.toString(); 
+
+							// row.reset_password_token_expires_at = row.reset_password_token_expires_at.valueOf();
+							// row.verify_email_token_expires_at = row.verify_email_token_expires_at.valueOf();
+
+							return row;
+						}));
+					}
+			});
+		});
+	}
+	
 	addVerification(ctx: IVerificationInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO Verification ( \
@@ -175,6 +211,18 @@ export class Query {
 							resolve({message: "Successfully delete", id: id});
 						} 
 						else resolve({error: true, message: 'Verification: delete item failed'});
+					}
+			});
+		});
+	}
+
+	getVerificationCount(){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT COUNT(id) AS recordCount FROM Verification;',
+				(err, row) => {
+					if (err) resolve({error: err.toString(), message: 'Verification: Invalid request'});
+					else {
+						resolve(row[0]);
 					}
 			});
 		});

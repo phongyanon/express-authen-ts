@@ -149,6 +149,35 @@ describe("CRUD Token", () => {
     });
   });
 
+  test("Get token pagination", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/token?page=1&limit=4`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data).toHaveLength;
+
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('total_records');
+    expect(res.body.pagination).toHaveProperty('current_page');
+    
+    expect(res.body.pagination).toHaveProperty('total_pages');
+    expect(res.body.pagination).toHaveProperty('next_page');
+    expect(res.body.pagination).toHaveProperty('prev_page');
+
+    expect(res.body.pagination.total_records).toBe(1);
+    expect(res.body.pagination.current_page).toBe(1);
+    expect(res.body.pagination.total_pages).toBe(1);
+
+    expect(res.body.pagination.next_page).toBe(null);
+    expect(res.body.pagination.prev_page).toBe(null);
+  });
+
+  test("Get tokens pagination but no query", async () => {
+    const res = await request(app).get(`/${api_version}/pagination/tokens`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Token: Invalid request');
+  });
+
   test("Get token", async () => {
     const res = await request(app).get(`/${api_version}/token/${result_id}`);
     expect(res.statusCode).toBe(200);
