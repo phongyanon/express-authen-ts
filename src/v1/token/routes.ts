@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { Controller } from "./controllers";
-import { ITokenInsert, ITokenUpdate, IToken } from "./token.type";
-import { IResponse, ISuccessResponse } from "../utils/common.type";
+import { ITokenInsert, ITokenUpdate, IToken, IPaginationTokenResp, ITokenInfo } from "./token.type";
+import { IResponse, ISuccessResponse, IPagination } from "../utils/common.type";
 import { auth, checkRole, checkRoleUserAccess } from "../middleware/authen";
 import { Role, isSingleRole } from "../utils/role";
 
@@ -34,6 +34,24 @@ router.get("/token/:id", auth, checkRole([Role.SuperAdmin, Role.Admin, Role.User
     else res.status(500).send(result);
   }
   else res.status(200).send(result);
+});
+
+router.get("/pagination/tokens", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {
+  const query: IPagination = {
+    page: req.query?.page === undefined ? 0 : parseInt(req.query.page as string),
+    limit: req.query?.limit  === undefined ? 0 : parseInt(req.query.limit as string)
+  };
+  let result: IResponse | IPaginationTokenResp = await token.getTokenPagination(query);
+  
+  if (result.hasOwnProperty('error')) res.status(500).send(result);
+  else {
+    (result as IPaginationTokenResp).data = ((result as IPaginationTokenResp).data as ITokenInfo[]).map((record: ITokenInfo) => {
+      record.access_token = '***';
+      record.refresh_token = '***';
+      return record;
+    });
+    res.status(200).send(result);
+  }
 });
 
 router.post("/token", auth, checkRole([Role.SuperAdmin, Role.Admin]), async (req: Request, res: Response) => {

@@ -92,6 +92,38 @@ export class Query {
 		});
 	}
 
+	getTokenPagination(limit: number, offset: number){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT \
+				User.username, \
+				Token.id, \
+				Token.user_id, \
+				Token.refresh_token, \
+				Token.refresh_token_expires_at, \
+				Token.access_token, \
+				Token.access_token_expires_at, \
+				Token.description, \
+				Token.create_at \
+				FROM Token INNER JOIN User ON Token.user_id = User.id ORDER BY User.username, User.id LIMIT ? OFFSET ?;'
+				, [limit.toString(), offset.toString()],
+				(err, rows) => {
+					if (err) resolve({error: err.toString()});
+					else {
+						resolve(rows.map( row => {
+							row.user_id = row.user_id.toString(); 
+							if (row.create_at !== null) {
+								row.create_at = row.create_at.valueOf();
+							}
+							// row.refresh_token_expires_at = row.refresh_token_expires_at.valueOf();
+							// row.access_token_expires_at = row.access_token_expires_at.valueOf();
+
+							return row;
+						}));
+					}
+			});
+		});
+	}
+
 	addToken(ctx: ITokenInsert){
 		return new Promise( resolve => {
 			this.con.execute<ResultSetHeader>('INSERT INTO Token ( \
@@ -194,6 +226,18 @@ export class Query {
 							resolve({message: "Successfully delete", deletedItems: result.affectedRows});
 						} 
 						else resolve({error: true, message: 'Token: delete item failed'});
+					}
+			});
+		});
+	}
+
+	getTokenCount(){
+		return new Promise( resolve => {
+			this.con.execute<RowDataPacket[]>('SELECT COUNT(id) AS recordCount FROM Token;',
+				(err, row) => {
+					if (err) resolve({error: err.toString(), message: 'Token: Invalid request'});
+					else {
+						resolve(row[0]);
 					}
 			});
 		});

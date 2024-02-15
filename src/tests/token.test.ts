@@ -150,7 +150,7 @@ describe("CRUD Token", () => {
   });
 
   test("Get token pagination", async () => {
-    const res = await request(app).get(`/${api_version}/pagination/token?page=1&limit=4`);
+    const res = await request(app).get(`/${api_version}/pagination/tokens?page=1&limit=4`);
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('data');
     expect(res.body.data).toHaveLength;

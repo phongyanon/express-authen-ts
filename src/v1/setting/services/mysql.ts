@@ -68,7 +68,7 @@ export class Query {
 		return new Promise( resolve => {
 			let props: string[] = [
 				"reset_password_interval",
-				"reset_password_interval",
+				"enable_reset_password_interval",
 				"enable_verify_email"
 			];
 			let set_field: string = '';

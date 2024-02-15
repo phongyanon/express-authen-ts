@@ -1358,6 +1358,72 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ITokenInfo": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"user_id": {
+						"type": "string"
+					},
+					"access_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"access_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"refresh_token": {
+						"type": "string",
+						"nullable": true
+					},
+					"refresh_token_expires_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"create_at": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"user_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaginationTokenResp": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ITokenInfo"
+						},
+						"type": "array"
+					},
+					"pagination": {
+						"$ref": "#/components/schemas/IPaginationInfo"
+					}
+				},
+				"required": [
+					"data",
+					"pagination"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ITokenInsert": {
 				"properties": {
 					"user_id": {
@@ -4192,6 +4258,76 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/pagination/tokens": {
+			"get": {
+				"operationId": "GetTokenPagination",
+				"responses": {
+					"200": {
+						"description": "Get tokens pagination",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IResponse"
+										},
+										{
+											"$ref": "#/components/schemas/IPaginationTokenResp"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"data": [
+												{
+													"id": "5",
+													"username": "test",
+													"user_id": "test",
+													"access_token": "access_token",
+													"access_token_expires_at": 1660926192000,
+													"refresh_token": "refresh_token",
+													"refresh_token_expires_at": 1660926192000,
+													"description": "secret"
+												}
+											],
+											"pagination": {
+												"total_records": 8,
+												"current_page": 1,
+												"total_pages": 3,
+												"next_page": 2,
+												"prev_page": null
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]

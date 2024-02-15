@@ -43,8 +43,12 @@ export class Query {
 							row[0].otp_verified = row[0].otp_verified === 0 ? false: true;
 							row[0].user_id = row[0].user_id.toString();
 
-							row[0].reset_password_token_expires_at = row[0].reset_password_token_expires_at.valueOf();
-							row[0].verify_email_token_expires_at = row[0].verify_email_token_expires_at.valueOf();
+							if (row[0].reset_password_token_expires_at !== null) {
+								row[0].reset_password_token_expires_at = row[0].reset_password_token_expires_at.valueOf();
+							}
+							if (row[0].verify_email_token_expires_at !== null) {
+								row[0].verify_email_token_expires_at = row[0].verify_email_token_expires_at.valueOf();
+							}
 
 							resolve(row[0]);
 						}
