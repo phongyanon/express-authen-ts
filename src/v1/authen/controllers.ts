@@ -456,7 +456,7 @@ export class Controller {
 							resolve({message: 'success'});
 						} else {
 							// send link button to verify email
-							let verify_email_link: string = `127.0.0.1:8000/v1/email/token/verify/?user_id=${user_email.id}&token=${verify_token}`;
+							let verify_email_link: string = `localhost:3000/email/verify/${user_email.id}/${verify_token}`;
 							let send_mail_result: ISendMailResp = await sendMail({
 								email_to: user_email.email,
 								subject: `Verify Email from my auth platform to ${user_email.email}`,
